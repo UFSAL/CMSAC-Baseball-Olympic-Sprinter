@@ -1,5 +1,5 @@
 ---
-title: "Would an Olympic Sprinter Give More Value as a Pure Pinch Runner Than the Average 13th Position Player on an MLB Roster?"
+title: "Feasibility of Using Major League Baseball 26-man Roster Spot on an Olympic-Level Sprinter"
 bibliography: references.bib
 link-citations: true
 format:
