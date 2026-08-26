@@ -1,0 +1,6 @@
+check,passed
+Race-distribution scale is positive,TRUE
+League constants cover 2021-2025,TRUE
+Roster-window sample is not empty,TRUE
+Calculated policy covers 2021-2025,TRUE
+All reported results are finite,TRUE
