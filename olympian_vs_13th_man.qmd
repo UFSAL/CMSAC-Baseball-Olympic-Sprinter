@@ -186,7 +186,7 @@ The sample holds 2,488 team-games with 12 batters and 13,336 team-games with 13 
 
 Due to a few different reasons, it is difficult to directly translate sprinter split time into baseball split time. We create a race model to translate a given sprinter into a baseball setting. The race model uses the Jamaican sprinter Oblique Seville. The 2024 Paris Summer Olympics race report gives his cumulative times at each 10-meter point [@paris2024]. The official World Athletics result puts Seville eighth (last place) in the 100-meter final with a time of 9.91 seconds [@worldathletics2024]. The model uses these times as a proxy for baseball speed. We also use 90-foot stolen base splits from the Statcast 90-foot running splits leaderboard [@savant_sprint].
 
-The model fits one smooth curve to the six published split times. One difference in how 100-meter sprint splits and stolen base splits are calculated is that 100-meter splits account for reaction time. Stolen base sprint splits start when the baserunner breaks. As a rough estimate, we subtract 0.15 seconds for the difference between a gun start and a Statcast start. The result is a runner time at each point on the basepath. @tbl-splits and @fig-splits give these inputs.
+The model fits one smooth curve to the six published split times. One difference in how 100-meter sprint splits and stolen base splits are calculated is that 100-meter splits account for reaction time. Stolen base sprint splits start when the baserunner breaks. The official results give Seville a measured reaction time of 0.171 seconds, so we subtract that from his splits. The result is a runner time at each point on the basepath. @tbl-splits and @fig-splits give these inputs.
 
 ```{r}
 #| label: tbl-splits
@@ -194,14 +194,14 @@ The model fits one smooth curve to the six published split times. One difference
 
 splits <- tibble(
   Runner = c("Seville, reaction removed", "MLB average, 2021-2025", "MLB fastest, 2021-2025"),
-  `5 ft` = c(0.54, 0.55, 0.50),
-  `10 ft` = c(0.84, 0.87, 0.78),
-  `20 ft` = c(1.29, 1.38, 1.24),
-  `30 ft` = c(1.66, 1.81, 1.64),
-  `45 ft` = c(2.16, 2.40, 2.18),
-  `60 ft` = c(2.62, 2.96, 2.69),
-  `75 ft` = c(3.06, 3.49, 3.17),
-  `90 ft` = c(3.48, 4.05, 3.66)
+  `5 ft` = c(0.52, 0.55, 0.50),
+  `10 ft` = c(0.82, 0.87, 0.78),
+  `20 ft` = c(1.27, 1.38, 1.24),
+  `30 ft` = c(1.64, 1.81, 1.64),
+  `45 ft` = c(2.14, 2.40, 2.18),
+  `60 ft` = c(2.60, 2.96, 2.69),
+  `75 ft` = c(3.04, 3.49, 3.17),
+  `90 ft` = c(3.46, 4.05, 3.66)
 )
 kable(splits, format = "latex", booktabs = TRUE, digits = 2,
       align = c("l", rep("r", 8)))
@@ -251,7 +251,7 @@ Seville gains most of his advantage after the first 20 feet, largely due to the 
 
 The race margin is the runner's arrival time at second base minus the tag's arrival time. A negative margin is safe; a margin of zero or more is out. Both clocks start when the runner breaks for second. We built the runner's clock from Seville's 2024 Paris Summer Olympics splits. Given the difference in how reaction time is measured between MLB and the Olympics, Seville's launch appears ordinary, so he takes a normal primary lead of 10.5 to 12.5 feet and gains nothing significant compared to normal MLB runners before the pitch is thrown. From a lead of (on average) 11.7 feet he has 78.3 feet to cover.
 
-@fig-race shows the result. Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.294 seconds after first movement, against 3.558 seconds for a league-average runner. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. We will assume the worst-case scenario that Seville will always face Realmuto, so a 1.86s pop time.
+@fig-race shows the result. Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.279 seconds after first movement, against 3.564 seconds for the average runner who attempts a steal. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. We will assume the worst-case scenario that Seville will always face Realmuto, so a 1.86s pop time.
 
 ```{r}
 #| label: fig-race
@@ -267,16 +267,16 @@ ggplot(gd, aes(m, dd)) +
   geom_area(data = filter(gd, m < 0), fill = BLUE, alpha = 0.22) +
   geom_line(colour = BLUE, linewidth = 0.6) +
   geom_vline(xintercept = 0, colour = ORANGE, linewidth = 0.6) +
-  annotate("text", x = -0.255, y = 1.9, size = 2.6, colour = INK, fontface = "bold",
+  annotate("text", x = -0.295, y = 1.25, size = 2.6, colour = INK, fontface = "bold",
            lineheight = 0.95,
            label = sprintf("%s of attempts land\non the safe side of 0",
                            percent(p_safe, accuracy = 0.1))) +
-  annotate("text", x = 0.045, y = 3.1, label = "tag wins", size = 2.4, colour = ORANGE,
+  annotate("text", x = 0.035, y = 2.1, label = "tag wins", size = 2.4, colour = ORANGE,
            fontface = "bold", hjust = 0) +
-  scale_x_continuous(breaks = c(-0.5, -0.375, -0.250, -0.12, 0),
-                     labels = c("-0.5", "-0.375", "-0.250", "-0.12", "0"),
-                     limits = c(-0.56, 0.24)) +
-  scale_y_continuous(limits = c(0, 4.3), expand = expansion(mult = c(0, 0.02))) +
+  scale_x_continuous(breaks = c(-0.75, -0.5, -0.295, -0.12, 0),
+                     labels = c("-0.75", "-0.5", "-0.295", "-0.12", "0"),
+                     limits = c(-0.78, 0.20)) +
+  scale_y_continuous(limits = c(0, 2.9), expand = expansion(mult = c(0, 0.02))) +
   labs(x = "race margin (s):  runner arrival minus tag arrival", y = NULL,
        title = "Spread around the median margin gives the safe rate") +
   theme_minimal(base_size = 9) +
@@ -287,9 +287,9 @@ ggplot(gd, aes(m, dd)) +
         plot.background = element_rect(fill = SURF, colour = NA))
 ```
 
-The throw reaches second base at 3.246 seconds, marginally ahead of the runner. Seville is normally safe because we estimated that, based on stolen base attempts from 2021-2025, applying the tag takes roughly a further 0.298 seconds. All things considered, Seville will beat the tag by an average 0.250 seconds.
+The throw reaches second base at 3.246 seconds, marginally ahead of the runner. Seville is normally safe because we estimate that, based on stolen base attempts from 2021-2025, applying the tag takes roughly a further 0.328 seconds. All things considered, Seville will beat the tag by an average 0.295 seconds.
 
-We model the race margin as a logistic distribution centred on the  0.250 second margin above, and we assign it a scale parameter of 0.072 seconds. This scale was taken from observing real-life variance in MLB stolen base success rates. This provides the safe rate visible in Figure 1 of 97%.
+We model the race margin as a logistic distribution centred on the 0.295 second margin above, and we assign it a scale parameter of 0.113 seconds. This scale was found from observing tracked throws and stolen base attempts to find an estimate for variance in stolen base attempts. This provides the safe rate visible in @fig-race of 93.1%.
 
 ## Run value of one steal attempt
 
@@ -339,7 +339,7 @@ read_csv(file.path("output", "reproducibility", "game_state_decisions.csv"),
 
 The standard 13th batter, on average, produced -0.498 WAR for each 162 games. The 12-player and 13-player comparison did not show a reliable rest effect, so the study adds no rest value. The total value of Option A is -0.498 WAR. This makes sense, considering the "worst" player on a roster will usually be at or around "replacement level".
 
-Option B, the sprinter, produced 1.015 net WAR across an average 74.9 uses over the course of the season. Using the sprinter is worth 1.514 WAR more than the 13th batter. 
+Option B, the sprinter, produced 0.795 net WAR across an average 70.3 uses over the course of the season. Using the sprinter is worth 1.293 WAR more than the 13th batter. 
 
 The result comes from three separate conditions:
 
@@ -359,7 +359,7 @@ In each MLB season, during September, teams are allowed to roster 28 players on 
 
 # Conclusion
 
-Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, the strategy adds an estimated 1.514 wins of run value over a 162-game season. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
+Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, the strategy adds an estimated 1.293 wins of run value over a 162-game season. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
 
 \newpage
 

@@ -50,13 +50,27 @@ message("1. Calculate the race distribution and stolen-base run value.")
 
 # The race margin is runner arrival time minus tag arrival time.
 # A negative value is safe. Zero or a positive value is an out.
-# Centre calibrated on the league: requiring the same clock to reproduce the
-# observed 2021-2025 league safe rate at second base pins the runner's jump at
-# v0 = 3.86 ft/s. Carrying that jump to Seville puts him at second base 3.294 s
-# after first movement, against a tag at 1.386 + 1.860 + 0.298 = 3.544 s.
-# The 1.860 s pop time is the best mark of the 2025 season (Realmuto and Bailey).
-race_center_seconds <- -0.250
-race_spread_seconds <- 0.072
+#
+# Both race parameters are DERIVED, not typed in. scripts/estimate_race_scale.R
+# fits every MLB runner and Seville through one kinematic model, takes the timing
+# edge from those fits, estimates the logistic scale from 8,772 tracked throws to
+# second base, and calibrates the centre so a league runner in a contested race
+# reproduces the observed safe rate. It writes race_parameters.csv, which is read
+# below. Run it directly to see the full derivation.
+race_parameter_file <- file.path(result_dir, "race_parameters.csv")
+estimator <- file.path(project_root, "scripts", "estimate_race_scale.R")
+if (!file.exists(estimator)) stop("Missing the race-scale estimator: ", estimator)
+message("   deriving race parameters (scripts/estimate_race_scale.R)")
+estimator_status <- system2("Rscript", estimator, stdout = FALSE, stderr = FALSE)
+if (estimator_status != 0 || !file.exists(race_parameter_file)) {
+  stop("The race-scale estimator failed; cannot continue without its parameters.")
+}
+race_parameters <- read_csv(race_parameter_file, show_col_types = FALSE)
+race_center_seconds <- race_parameters$race_center_seconds[[1]]
+race_spread_seconds <- race_parameters$race_spread_seconds[[1]]
+if (!is.finite(race_center_seconds) || race_center_seconds >= 0) {
+  stop("The derived race centre must be negative.")
+}
 safe_cutoff_seconds <- 0
 
 if (race_spread_seconds <= 0) stop("The race spread must be positive.")

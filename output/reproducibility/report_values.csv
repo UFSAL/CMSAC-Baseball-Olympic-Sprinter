@@ -1,10 +1,10 @@
 value,estimate
-race_center_seconds,-0.25
-race_spread_seconds,0.072
-safe_probability,0.9698869890348052
-expected_safe_per_100,96.98869890348053
+race_center_seconds,-0.2951900368841
+race_spread_seconds,0.113123655451292
+safe_probability,0.931467020663465
+expected_safe_per_100,93.14670206634649
 weighted_runs_per_win,9.79631652972172
-gross_wsb_runs_per_attempt,0.18161237133527106
+gross_wsb_runs_per_attempt,0.15815234229535324
 six_game_windows,23546
 conventional_war,-0.4983596482443332
 rest_team_games_12,2488
@@ -18,7 +18,7 @@ rest_ci_high,0.005734485992673859
 rest_p_value,0.7035335782015661
 rest_war_used,0
 average_substitution_cost_runs,0.12994135400555662
-olympian_uses_per_team,74.89999999999999
-olympian_net_war,1.0154731366116359
-olympian_net_wpa,2.075052867460958
-war_edge,1.513832784855969
+olympian_uses_per_team,70.34
+olympian_net_war,0.794845588665063
+olympian_net_wpa,2.0126062475340594
+war_edge,1.2932052369093963
