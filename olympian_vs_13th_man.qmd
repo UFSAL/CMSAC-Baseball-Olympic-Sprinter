@@ -351,11 +351,13 @@ The result comes from three separate conditions:
 
 We only take into account stealing second base due to the lack of available data otherwise. First-to-third advances, runs scored from second base, stealing third base, and other possible baserunning factors are difficult to accurately model due to data availability issues.
 
-It is very difficult to track the effect of rest on injuries. Besides in-depth investigations into the individual causes of certain injuries, it is extremely difficult to tell the exact "injury prevention" value rest carries.
+It is very difficult to track the effect of rest on injuries. Besides in-depth investigations into the individual causes of certain injuries, it is extremely challenging to tell the exact "injury prevention" value rest carries.
 
 It is possible that the introduction of a sprinter will lead to pitchouts. Pitchouts have been generally abandoned due to their perceived negative value, but it is possible that teams would begin using pitchouts specifically to combat the sprinter. We cannot know with certainty how teams would respond to this scenario.
 
-In each MLB season, during September, teams are allowed to roster 28 players on the active roster instead of the usual 26. In this case, using the sprinter clearly becomes even more favorable. However, the relatively small sample size of a single month makes it difficult to confidently analyze exactly how much value a 14th batter would provide.
+A negative against the Olympic-caliber sprinter is that teams are effectively barred from using their 12th batter efficiently as well. Instead of potentially using the 12th batter as a platoon bat or as a general pinch hitter, teams would have to keep the 12th batter on the bench in case the Olympic-caliber sprinter comes into the game. Given the difficulty of consistently predicting when a bench player would be substituted into a game, we cannot correctly account for this.
+
+In each MLB season, during September, teams are allowed to roster 28 players on the active roster instead of the usual 26. In this case, using the sprinter clearly becomes even more favorable. However, the relatively small sample size of a single month makes it difficult to confidently analyze exactly how much value a 14th batter would provide. Additionally, teams occasionally use 15 pitchers and 13 batters instead of an even 14-14 split.
 
 # Conclusion
 
