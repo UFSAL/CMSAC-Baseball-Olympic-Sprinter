@@ -129,7 +129,7 @@ To decide on the value of the sprinter, the paper must also define when it is op
 
 Barring hypothetical edge cases, there is no realistic reason for a team not to use all the slots on a 26-man roster. A bench player provides value through batting, fielding, and rest. A pure pinch runner provides only baserunning value.
 
-One important statistic to use in evaluating the pure pinch runner is Weighted Stolen Base Runs (wSB). wSB gives a run value to each stolen base and to each caught stealing [@fangraphs_wsb]. FanGraphs publishes these run values for each season. Since the sprinter does not bat and does not field, the model only has to assign stolen-base value, which can be translated into WAR. This analysis excludes baserunning value besides purely stealing second base, because the value becomes harder to significantly quantify. There is not as much publicly available third base steal data available. There is even less data available for basepath running, such as going first-to-third or second-to-home.
+One important statistic to use in evaluating the pure pinch runner is Weighted Stolen Base Runs (wSB). wSB gives a run value to each stolen base and to each caught stealing [@fangraphs_wsb]. FanGraphs publishes these run values for each season. Since the sprinter does not bat and does not field, the model only has to assign stolen-base value, which can be translated into WAR. This analysis covers the steal of second base and the steal of third base. It excludes other baserunning value, because that value becomes harder to significantly quantify. There is little data available for basepath running, such as going first-to-third or second-to-home.
 
 The decision to run needs game context. Win expectancy is the probability that the batting team wins from a given game state. Markov models of the base-out states produce these probabilities [@bukiet1997]. This paper builds win expectancy from the 2021-2025 plate appearances and uses it in the decision rule.
 
@@ -245,8 +245,6 @@ ggplot(splits_long, aes(distance_ft, time, color = Runner, group = Runner)) +
   )
 ```
 
-Seville gains most of his advantage after the first 20 feet, largely due to the difference in measurement of reaction time. Removing 0.15s from Seville's splits is likely a small underestimation for his true reaction time, but it only serves to underscore how much faster an Olympic-caliber sprinter is compared to the fastest MLB baserunners.
-
 ## The race-margin distribution
 
 The race margin is the runner's arrival time at second base minus the tag's arrival time. A negative margin is safe; a margin of zero or more is out. Both clocks start when the runner breaks for second. We built the runner's clock from Seville's 2024 Paris Summer Olympics splits. Given the difference in how reaction time is measured between MLB and the Olympics, Seville's launch appears ordinary, so he takes a normal primary lead of 10.5 to 12.5 feet and gains nothing significant compared to normal MLB runners before the pitch is thrown. From a lead of (on average) 11.7 feet he has 78.3 feet to cover.
@@ -259,7 +257,7 @@ The race margin is the runner's arrival time at second base minus the tag's arri
 #| fig-width: 7.0
 #| fig-height: 2.5
 
-BLUE <- "#2a78d6"; ORANGE <- "#eb6834"; INK <- "#0b0b0b"; INK2 <- "#52514e"; SURF <- "#fcfcfb"
+BLUE <- "#2a78d6"; ORANGE <- "#eb6834"; INK <- "#0b0b0b"; INK2 <- "#52514e"; SURF <- "#ffffff"
 
 gd <- tibble(m = seq(-0.56, 0.24, length.out = 800)) |>
   mutate(dd = dlogis(m, race_margin_center, race_margin_spread))
@@ -307,6 +305,66 @@ MLB rules do not let the original runner return after the sprinter enters the ga
 
 This substitution cost depends entirely on when the sprinter is substituted in: there will be more plate appearances left in the game if it's the sixth inning compared to the tenth inning. We compare the run value to that of a replacement-level player per PA multiplied by the expected amount of PAs remaining.
 
+@fig-subcost gives the cost for each state in which the rule uses the sprinter. Fewer plate appearances and fewer defensive innings remain as the game goes on. The cost falls from 0.095 runs in the sixth inning to 0.009 runs in the ninth. The mean across these states is 0.043 runs, against 0.158 runs of gain from one steal attempt. The substitution takes back about half of the gain in the sixth inning, and almost none of it in the ninth.
+
+```{r}
+#| label: fig-subcost
+#| fig-cap: "Run expectancy lost to the substitution, for every state in which the rule uses the sprinter. The bench player who replaces the original batter is worth less, but only for the plate appearances and defensive innings that remain."
+#| fig-width: 7.0
+#| fig-height: 2.4
+
+BLUE <- "#2a78d6"; ORANGE <- "#eb6834"; INK <- "#0b0b0b"; INK2 <- "#52514e"; SURF <- "#ffffff"
+
+sc <- tibble(
+  inning = rep(6:9, each = 6),
+  half   = rep(rep(c("bottom", "top"), each = 3), 4),
+  outs   = rep(0:2, 8),
+  smoothed_cost = c(
+    0.07968, 0.07383, 0.06963, 0.09531, 0.08817, 0.08201,
+    0.05227, 0.04657, 0.04042, 0.07051, 0.06404, 0.05835,
+    0.02151, 0.01782, 0.01680, 0.03683, 0.02931, 0.02393,
+    0.01152, 0.01000, 0.00855, 0.01144, 0.01032, 0.00973
+  )
+) |>
+  mutate(
+    idx = (inning - 6) * 3 + outs + 1,
+    side = if_else(half == "top", "Away team batting", "Home team batting")
+  )
+
+tags <- sc |>
+  filter(idx == 5) |>
+  mutate(y = smoothed_cost + if_else(half == "top", 0.016, -0.016))
+
+ggplot(sc, aes(idx, smoothed_cost, colour = side)) +
+  geom_vline(xintercept = c(3.5, 6.5, 9.5), colour = "grey88", linewidth = 0.3) +
+  geom_hline(yintercept = 0.158, colour = ORANGE,
+             linetype = "22", linewidth = 0.5) +
+  annotate("text", x = 0.8, y = 0.146, hjust = 0, size = 2.5,
+           colour = ORANGE, fontface = "bold",
+           label = "gain from one steal attempt: 0.158 runs") +
+  annotate("text", x = c(2, 5, 8, 11), y = 0.183, label = c("6th", "7th", "8th", "9th"),
+           size = 2.8, colour = INK, fontface = "bold") +
+  geom_line(linewidth = 0.6) +
+  geom_point(size = 1.1) +
+  geom_text(data = tags, aes(x = idx, y = y, label = side), size = 2.5,
+            fontface = "bold", show.legend = FALSE) +
+  scale_colour_manual(values = c("Away team batting" = INK2, "Home team batting" = BLUE)) +
+  scale_x_continuous(breaks = 1:12, labels = rep(c("0", "1", "2"), 4),
+                     limits = c(0.8, 12.4)) +
+  scale_y_continuous(limits = c(0, 0.192), breaks = seq(0, 0.15, 0.05),
+                     expand = expansion(mult = c(0, 0))) +
+  labs(x = "outs, inside each inning", y = "runs lost", colour = NULL,
+       title = "The substitution costs less as the game gets later") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.2, colour = "grey90"),
+        axis.title = element_text(size = 7.6, colour = INK2),
+        plot.title = element_text(face = "bold", size = 8.4, colour = INK),
+        plot.background = element_rect(fill = SURF, colour = NA))
+```
+
 ## The game-state decision rule
 
 We examine each real plate appearance with a runner on first base and second base empty. We record the inning, the half-inning, the score, the outs, the occupied bases, the runner, the substitution cost, and the two possible results. We have to create a model that will tell us when it is "best" to use the sprinter during a game, trying to strike a chord between not substituting them in too early and not missing the best opportunity to do so.
@@ -335,11 +393,46 @@ read_csv(file.path("output", "reproducibility", "game_state_decisions.csv"),
   kable(format = "latex", booktabs = TRUE, align = c("r", "r", "l"))
 ```
 
+## Stealing third base
+
+The sprinter is on second base after a successful steal. We apply the same model to a steal of third base. Only three inputs change: the distance, the catcher's pop time, and the run values. Seville must cover 70.1 feet.
+
+Baseball Savant records catcher throws to third base as well as to second [@savant_throwing]. The archive holds 2,103 tracked throws to third base between 2021 and 2025, and 1,095 of these also carry a pop time. The scale from that sample is 0.104 seconds, against 0.113 seconds for the throw to second base. Two separate races and two separate samples give almost the same spread, which supports the structure of the model.
+
+J.T. Realmuto averaged 1.41 seconds on his throws to third base in 2025, and we again give the sprinter that catcher on every attempt. Seville reaches third base 3.027 seconds after first movement, against 3.274 seconds for the average runner who attempts a steal. The model gives him a safe rate of 92.2%.
+
+A steal of third base is not worth the same as a steal of second base. The gain is almost equal, but the cost of an out is much larger. The defence removes a runner who is already in scoring position. @tbl-third gives the run values from the 2021-2025 RE24 table.
+
+```{r}
+#| label: tbl-third
+#| tbl-cap: "Run value of a steal of third base, by out count"
+
+tibble(
+  Outs = 0:2,
+  gain = c( 0.192807,  0.273605,  0.039734),
+  loss = c(-0.873157, -0.592461, -0.332719),
+  brk  = c( 0.819125,  0.684083,  0.893319),
+  exp  = c( 0.109815,  0.206176,  0.010736)
+) |>
+  transmute(
+    Outs,
+    `Runs if safe`    = sprintf("%+.3f", gain),
+    `Runs if caught`  = sprintf("%+.3f", loss),
+    `Break-even rate` = percent(brk, accuracy = 0.1),
+    `Expected runs`   = sprintf("%+.3f", exp)
+  ) |>
+  kable(format = "latex", booktabs = TRUE, align = c("r", "r", "r", "r", "r"))
+```
+
+The break-even rate is higher at third base, and it changes sharply with the out count. With one out it is the lowest, because a runner on third base scores on a fly ball. The sprinter is above the break-even rate in every out state.
+
 # Results
 
 The standard 13th batter, on average, produced -0.498 WAR for each 162 games. The 12-player and 13-player comparison did not show a reliable rest effect, so the study adds no rest value. The total value of Option A is -0.498 WAR. This makes sense, considering the "worst" player on a roster will usually be at or around "replacement level".
 
 Option B, the sprinter, produced 0.795 net WAR across an average 70.3 uses over the course of the season. Using the sprinter is worth 1.293 WAR more than the 13th batter. 
+
+The sprinter reaches second base safely on 65.5 of those uses. If he then attempts third base on each of them, he adds 8.11 runs for each team-season, which is 0.828 WAR. The combined programme is worth 1.623 WAR, or 2.121 WAR more than the 13th batter. We report the two bases separately. A steal of third base at this rate assumes an attempt frequency that no MLB runner has ever sustained.
 
 The result comes from three separate conditions:
 
@@ -347,9 +440,20 @@ The result comes from three separate conditions:
 - The substitution cost is usually small.
 - The 13th batter gives a value below replacement level in every season of the sample.
 
+# Case study: the 2025 Miami Marlins
+
+To test the effects of an Olympic-caliber sprinter, we applied one to the 2025 Miami Marlins. He was used in 71 game states. Using a Monte Carlo simulation, we tested the effects of the sprinter assuming the calculated stolen base rates. We scored each game with a simple points system that can be roughly translated into wins:
+
+- If the Olympic-caliber sprinter were to score a run in a game that the Marlins lost, and that the extra run turns into a tie, this counts as +0.5 points (to represent a 50% chance of victory).
+- If the Olympic-caliber sprinter were to score a run that changes the result from a loss to a win, this counts as +1.0 point. This happens when the real-life Marlins lost in extra innings when they could have won it inside the 9 innings using the sprinter.
+- The same rules apply in reverse: a win that becomes a tie counts as -0.5, and a win that becomes a loss counts as -1.0.
+- All other games count as zero.
+
+The 71 uses add roughly 21 total runs across the season. Across 400,000 simulated seasons the Marlins gain an estimated 1.34 wins and 5.05 ties. They give back 0.77 ties and 0.40 wins. The net result is 3.07 points for each season, and the sprinter improves the record in 98.3% of the simulated seasons. So, the sprinter is worth roughly 3.07 wins in actually-simulated situations. Considering only Win Probability Added (WPA), which does not take into account the actual result of the game, the same 71 uses give the sprinter 3.40 WPA across the season. Of this, 1.99 WPA comes from the steal of second base and 1.41 WPA from the steal of third base.
+
 # Limitations
 
-We only take into account stealing second base due to the lack of available data otherwise. First-to-third advances, runs scored from second base, stealing third base, and other possible baserunning factors are difficult to accurately model due to data availability issues.
+We only take into account stealing second base and stealing third base. First-to-third advances, runs scored from second base, and other possible baserunning factors are difficult to accurately model due to data availability issues.
 
 It is very difficult to track the effect of rest on injuries. Besides in-depth investigations into the individual causes of certain injuries, it is extremely challenging to tell the exact "injury prevention" value rest carries.
 
@@ -361,7 +465,7 @@ In each MLB season, during September, teams are allowed to roster 28 players on 
 
 # Conclusion
 
-Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, the strategy adds an estimated 1.293 wins of run value over a 162-game season. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
+Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, a steal of second base adds an estimated 1.293 wins of run value over a 162-game season. A steal of third base on each successful attempt raises this to 2.121 wins. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
 
 \newpage
 

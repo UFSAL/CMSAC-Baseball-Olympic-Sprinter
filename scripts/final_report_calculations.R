@@ -430,6 +430,14 @@ cost_table <- average_candidates |>
     smoothed_cost = (cost_sum + 30 * overall_substitution_cost) / (n + 30)
   )
 
+# The report plots this schedule, so write it out with the other results.
+write_csv(
+  cost_table |>
+    arrange(inning, half, outs) |>
+    select(inning, half, outs, n, smoothed_cost),
+  file.path(result_dir, "substitution_cost_by_state.csv")
+)
+
 substitution_cost <- function(inning, half_index, outs) {
   half_label <- if (half_index == 0L) "top" else "bottom"
   row <- cost_table |>
