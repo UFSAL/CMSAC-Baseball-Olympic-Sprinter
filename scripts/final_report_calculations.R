@@ -114,6 +114,9 @@ gross_wsb_runs_mean <- weighted_mean_checked(
 
 message("2. Calculate the conventional 13th-player value.")
 
+# Ships as a prepared input, built in the full project by
+# build_repaired_windows.sh, which runs engine_07_windows.sql against the
+# repaired roster panel.
 roster_windows <- read_parquet(
   require_file(file.path(
     project_root,
@@ -147,12 +150,22 @@ conventional_war <- weighted_mean_checked(
 
 message("3. Compare team batting performance with 12 and 13 position players.")
 
-# The MLB Stats API active-roster endpoint applies retroactive transaction dates
-# (an IL placement backdated up to 3 days removes a player from days he was still
-# rostered). rosters_2021_2025_repaired.parquet undoes those premature drops and
-# missed additions using the transaction log. distinct() is required: the raw
-# snapshot contains duplicated player-dates that would otherwise inflate the
-# position-player count by one.
+# The MLB Stats API active-roster endpoint answers from the transaction record as
+# it stands now, so a move whose effective date precedes the date it was announced
+# (a backdated IL placement is the usual case) drops a player from snapshots on
+# which he was still rostered. rosters_2021_2025_repaired.parquet restores those.
+#
+# This panel ships as a prepared input. The scrape and the repair that build it
+# live in the full project (scrape_rosters.R, fetch_transactions.R,
+# repair_rosters.R). Rebuilding the repair from the transaction log recovers 2,218
+# of the 5,857 additions this file carries; the rest are not derivable from either
+# the log or the scrape. The choice is not material: war_13 is -0.5250 with no
+# repair, -0.5136 under the reproducible repair and -0.4984 here, against a
+# 1.293 WAR edge, and the rest effect is null under all three
+# (p = 0.322 / 0.368 / 0.704).
+#
+# distinct() is required: the raw snapshot contains duplicated player-dates that
+# would otherwise inflate the position-player count by one.
 rosters <- read_parquet(
   require_file(file.path(project_root, "data", "rosters_2021_2025_repaired.parquet"))
 ) |>
@@ -262,11 +275,29 @@ sprint_speeds <- read_csv(
   require_file(file.path(input_dir, "sprint_speed_2021_2025.csv")),
   show_col_types = FALSE
 )
-state_value_limits <- read_csv(
+# These state ceilings must be valued at the same safe rate the race model
+# derives. They were once stale - written at 98.7% against a 1.85-second pop while
+# the report had already moved to 93.1% - and because net_wpa reads them directly
+# (the WAR path does not; it rebuilds gross value from safe_probability), every
+# WPA figure came out about 30% high. The check below makes that impossible to
+# reintroduce silently. If it fires, run:
+#   Rscript scripts/regenerate_elite_rules.R
+state_value_source <- read_csv(
   require_file(file.path(input_dir, "elite_1_85_catcher_exact_rules.csv")),
   show_col_types = FALSE
 ) |>
-  filter(steal == "1B_to_2B") |>
+  filter(steal == "1B_to_2B")
+
+state_value_rate <- unique(state_value_source$primary_success_probability)
+if (length(state_value_rate) != 1L ||
+    abs(state_value_rate - safe_probability) > 1e-6) {
+  stop("elite_1_85_catcher_exact_rules.csv is valued at a safe rate of ",
+       paste(sprintf("%.6f", state_value_rate), collapse = ", "),
+       ", but the race model derives ", sprintf("%.6f", safe_probability),
+       ". Run: Rscript scripts/regenerate_elite_rules.R")
+}
+
+state_value_limits <- state_value_source |>
   select(
     inning, half, batting_score_diff, outs,
     max_replacement_cost_ubr_runs,

@@ -186,7 +186,7 @@ The sample holds 2,488 team-games with 12 batters and 13,336 team-games with 13 
 
 Due to a few different reasons, it is difficult to directly translate sprinter split time into baseball split time. We create a race model to translate a given sprinter into a baseball setting. The race model uses the Jamaican sprinter Oblique Seville. The 2024 Paris Summer Olympics race report gives his cumulative times at each 10-meter point [@paris2024]. The official World Athletics result puts Seville eighth (last place) in the 100-meter final with a time of 9.91 seconds [@worldathletics2024]. The model uses these times as a proxy for baseball speed. We also use 90-foot stolen base splits from the Statcast 90-foot running splits leaderboard [@savant_sprint].
 
-The model fits one smooth curve to the six published split times. One difference in how 100-meter sprint splits and stolen base splits are calculated is that 100-meter splits account for reaction time. Stolen base sprint splits start when the baserunner breaks. The official results give Seville a measured reaction time of 0.171 seconds, so we subtract that from his splits. The result is a runner time at each point on the basepath. @tbl-splits and @fig-splits give these inputs.
+The model fits one smooth curve to the eight published split times. One difference in how 100-meter sprint splits and stolen base splits are calculated is that 100-meter splits account for reaction time. Stolen base sprint splits start when the baserunner breaks. The official results give Seville a measured reaction time of 0.171 seconds, so we subtract that from his splits. The result is a runner time at each point on the basepath. @tbl-splits and @fig-splits give these inputs.
 
 ```{r}
 #| label: tbl-splits
@@ -449,7 +449,7 @@ To test the effects of an Olympic-caliber sprinter, we applied one to the 2025 M
 - The same rules apply in reverse: a win that becomes a tie counts as -0.5, and a win that becomes a loss counts as -1.0.
 - All other games count as zero.
 
-The 71 uses add roughly 21 total runs across the season. Across 400,000 simulated seasons the Marlins gain an estimated 1.34 wins and 5.05 ties. They give back 0.77 ties and 0.40 wins. The net result is 3.07 points for each season, and the sprinter improves the record in 98.3% of the simulated seasons. So, the sprinter is worth roughly 3.07 wins in actually-simulated situations. Considering only Win Probability Added (WPA), which does not take into account the actual result of the game, the same 71 uses give the sprinter 3.40 WPA across the season. Of this, 1.99 WPA comes from the steal of second base and 1.41 WPA from the steal of third base.
+The 71 uses add roughly 21 total runs across the season. Across 400,000 simulated seasons the Marlins gain an estimated 1.34 wins and 5.05 ties. They give back 0.77 ties and 0.40 wins. The net result is 3.07 points for each season, and the sprinter improves the record in 98.3% of the simulated seasons. So, the sprinter is worth roughly 3.07 wins in actually-simulated situations. Considering only Win Probability Added (WPA), which does not take into account the actual result of the game, the same 71 uses give the sprinter 3.005 WPA across the season. Of this, 1.528 WPA comes from the steal of second base and 1.477 WPA from the steal of third base.
 
 # Limitations
 

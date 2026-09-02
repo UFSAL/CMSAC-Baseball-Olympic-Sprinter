@@ -52,6 +52,14 @@ league <- selected |>
 conventional <- read_csv(need(file.path(OUT, "report_values.csv")), show_col_types = FALSE)
 war_13 <- conventional$estimate[conventional$value == "conventional_war"]
 
+# state_win_value_per_run and net_wpa descend from
+# elite_1_85_catcher_exact_rules.csv. That file was once valued at 98.7% while the
+# race model gave 93.1%, which put the WPA figures here about 30% high;
+# scripts/regenerate_elite_rules.R rebuilt it at the derived rate, and
+# final_report_calculations.R now refuses to run if the two ever diverge again.
+# The report quotes these figures to three decimals, because at two the rounded
+# parts do not sum to the rounded total.
+
 mia <- read_csv(need(file.path(IN, "marlins_2025_use_states.csv")), show_col_types = FALSE) |>
   left_join(selected |> filter(season == 2025) |>
               select(game_pk, inning, half, outs, net_wpa, state_win_value_per_run),

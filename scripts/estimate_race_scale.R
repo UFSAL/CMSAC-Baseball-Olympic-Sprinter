@@ -18,6 +18,9 @@ DECEL <- 13 * FT                   # slide friction, ft/s^2 -> m/s^2
 ARRIVE <- 21.7 * FT                # highest controllable arrival speed
 DIST <- 78.3 * FT                  # 90 ft less a normal primary lead
 ELITE_POP <- 1.860                 # best 2025 pop time to second base
+SEVILLE_REACTION <- 0.171          # his measured reaction, Paris 2024 100 m final
+# The eight marks the report prints in its split table.
+REPORT_MARKS_FT <- c(5, 10, 20, 30, 45, 60, 75, 90)
 
 ## ---- kinematics ------------------------------------------------------------
 # v(t) = vmax - (vmax - v0) exp(-t/tau);  x(t) is its integral.
@@ -97,8 +100,31 @@ runner_time <- tibble(season = splits$season, player_id = splits$player_id,
   filter(!is.na(steal), steal > 2.5, steal < 5.5)
 
 ## ---- Seville through the identical model -----------------------------------
-seville_dist  <- c(5, 10, 20, 30, 45, 60, 75, 90) * FT
-seville_times <- c(0.52, 0.82, 1.27, 1.64, 2.14, 2.60, 3.04, 3.46)  # 0.171 s reaction removed
+# His clock is read from the data file, not typed in. seville_90ft_splits.csv holds
+# the Paris 2024 final converted to the basepath (cumulative seconds every 5 ft, on
+# the same grid Statcast uses). That clock starts at the gun; a steal clock starts
+# when the runner breaks, so his measured reaction time comes off every split. The
+# curve is then fitted at the eight marks the report tabulates.
+seville_splits <- read.csv(need(file.path(ROOT, "data", "reference",
+  "savant_leaderboards", "seville_90ft_splits.csv")), check.names = FALSE)
+sev_cols <- grep("^seconds_since_hit_", names(seville_splits), value = TRUE)
+sev_marks_ft <- as.integer(sub("seconds_since_hit_", "", sev_cols))
+sev_break_clock <- as.numeric(seville_splits[1, sev_cols]) - SEVILLE_REACTION
+
+sev_at <- match(REPORT_MARKS_FT, sev_marks_ft)
+if (anyNA(sev_at)) stop("seville_90ft_splits.csv is missing a reported split mark.")
+seville_dist  <- REPORT_MARKS_FT * FT
+seville_times <- round(sev_break_clock[sev_at], 2)   # as printed in the report
+
+# The report prints these eight numbers, so fail loudly if the source file moves
+# rather than letting the published table and the fitted curve drift apart.
+if (!isTRUE(all.equal(seville_times,
+                      c(0.52, 0.82, 1.27, 1.64, 2.14, 2.60, 3.04, 3.46),
+                      tolerance = 1e-9))) {
+  stop("Seville's derived splits no longer match the table printed in the report: ",
+       paste(sprintf("%.2f", seville_times), collapse = " "))
+}
+
 sev_par  <- fit_curve(seville_dist, seville_times)
 sev_time <- steal_time(sev_par[1], sev_par[2])
 
