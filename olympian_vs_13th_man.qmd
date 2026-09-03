@@ -19,6 +19,7 @@ format:
       text: |
         \usepackage{booktabs}
         \usepackage{float}
+        \floatplacement{table}{H}
         \usepackage{fancyhdr}
         \usepackage{longtable}
         \usepackage{caption}
@@ -110,11 +111,11 @@ The 26-man roster is usually split up into two halves, one with 13 pitchers and 
 
 We examine real-life base-out situations from 2021-2025 to include the MLB's automatic runner rule in full-inning games. We recreate an approximation of the value for a "13th batter" on an MLB roster, taking into account both their personal run contribution and the respite they give their teammates when they play a game. We also examine Olympic-caliber sprinters' performances at the 2024 Paris Summer Olympics and compare them to MLB players. By applying a calculated "usage rule", we can develop a rough value calculation of the Olympic-caliber sprinter for comparison to the 13th batter.
 
-Our results highlight that assigning a 26-man roster spot to an Olympic-caliber sprinter can create positive value. In a direct comparison, the Olympic-caliber sprinter can outperform the 13th batter in both expected run value and win probability added.
+Under the model's timing, deployment, and substitution-cost assumptions, assigning a 26-man roster spot to an Olympic-caliber sprinter produces positive expected value relative to the constructed marginal position-player role.
 
 # Introduction
 
-An MLB active roster has 26 players. Most teams carry 13 pitchers and 13 batters. The 13th batter is the last man on the bench. He starts few games and he gets few plate appearances. Although there is a significant amount of nuance involved in a team's roster decisions, the general question we are trying to answer is whether an Olympic-caliber sprinter could provide more value than the 13th batter over the course of a season?
+An MLB active roster has 26 players. Teams commonly carry 13 pitchers and 13 position players. We define the 13th batter as the least-used eligible non-catcher position player; this player typically receives few starts and limited plate appearances. Although there is a significant amount of nuance involved in a team's roster decisions, the general question we are trying to answer is whether an Olympic-caliber sprinter could provide more value than the 13th batter over the course of a season?
 
 We compare two options for the same roster spot:
 
@@ -139,13 +140,32 @@ Our information mainly comes from three public sources. The 2024 Paris Summer Ol
 
 ## Data sample
 
-All parts of the analysis use the 2021-2025 MLB seasons to account for the existence of the Automatic Runner rule. The period excludes the 2020 season, which had seven-inning doubleheaders as a result of the COVID pandemic. The analysis excludes postseason and spring-training games. The project collected an active roster for each team on each game date.
+All parts of the analysis use the 2021-2025 MLB seasons to account for the existence of the Automatic Runner rule. The period excludes the 2020 season, which had seven-inning doubleheaders as a result of the COVID pandemic. The analysis excludes postseason and spring-training games. Pitch-level data for every game come from Baseball Savant's Statcast search [@savant_statcast], and they supply the batting, baserunning, fielding, and win-expectancy inputs used throughout. The project collected an active roster for each team on each game date from the MLB Stats API using the baseballr package [@baseballr2024].
 
 ## Selection of the 13th batter
 
-Although MLB teams usually only have 13 batters on their 26-man roster at any given moment in time, over the course of a season teams can use upwards of 20 different batters. We found that the best way to account for this is to check specific rolling windows over the course of the season to find who the "real" 13th batter would be.
+Although MLB teams usually only have 13 batters on their 26-man roster at any given moment in time, over the course of a season teams can use upwards of 20 different batters. We use overlapping six-game windows to identify the least-used stable non-catcher position player at each point in the season.
 
-MLB teams usually play six or seven games in a week. To properly evaluate rosters, we decided to check specifically a six-game window. Six games give players several batting opportunities and also limit the number of roster changes. A longer window would include more roster changes and more injuries, while a shorter one could introduce more variance.
+Six games approximately represent one week of MLB play and provide a practical balance between short-window variability and roster changes accumulated over longer windows. Six games give players several batting opportunities and also limit the number of roster changes. A longer window would include more roster changes and more injuries, while a shorter one could introduce more variance.
+
+We conducted a sensitivity analysis on the six-game window to see if a different length window would produce materially different results, but we found the eventual WAR benefits of the 13th batter to remain roughly the same. Due to the logic behind MLB scheduling, we decided that the six-game window made the most practical sense to continue using. @tbl-windowlen gives the comparison.
+
+```{r}
+#| label: tbl-windowlen
+#| tbl-cap: "Window-length sensitivity of the 13th-batter selection, 2021-2025"
+
+read_csv(file.path("output", "sensitivity", "window_length", "window_length_summary.csv"),
+         show_col_types = FALSE) |>
+  transmute(
+    Window = window_len,
+    `PA in window` = sprintf("%.2f", pa_in_window),
+    `Zero-PA` = percent(zero_pa_share, accuracy = 0.1),
+    `WAR per 162` = sprintf("%+.3f", war_per_162),
+    `Match to six-game` = percent(same_player_as_6g, accuracy = 0.1)
+  ) |>
+  kable(format = "latex", booktabs = TRUE, linesep = "",
+        align = c("r", "r", "r", "r", "r"))
+```
 
 These windows overlap. The first window would hold games 1 to 6. The next window holds games 2 to 7. The overlap gives a new roster observation after each game. Our model uses them to describe roster use.
 
@@ -155,8 +175,8 @@ The player with the fewest plate appearances (PA) in the window became the 13th 
 
 The project then calculated WAR for each player-game, which permits an exact six-game total. WAR is a summation of runs generated through batting, stolen-base, fielding, positional, league, and replacement runs [@fangraphs_war].
 
-- Batting runs were calculated using Run Expectancy 24 (RE24), which calculates the expected run value a player generated in each specific PA.
-- Stolen-base runs were calculated using wSB. This was used instead of a different statistic like Ultimate Baserunning (UBR) due to differences in how baserunning value is assigned. Additionally, the sprinter will only be assigned stolen-base runs, so it evens out between both options.
+- Batting runs were calculated using Run Expectancy 24 (RE24) [@fangraphs_re24], which calculates the expected run value a player generated in each specific PA.
+- Stolen-base runs were calculated using wSB. This was used instead of a different statistic like Ultimate Base Running (UBR) [@fangraphs_ubr] due to differences in how baserunning value is assigned. Additionally, the sprinter will only be assigned stolen-base runs, so it evens out between both options.
 - Fielding runs are incredibly difficult to assign due to widespread disagreement in the best way to do so. This paper chose to use a simpler and older statistic, Zone Rating (ZR), due to unavailability and unreliability of statistics like Defensive Runs Saved (DRS), Ultimate Zone Rating (UZR), and Outs Above Average (OAA). These statistics each have critics and propenents, which is why this paper chose a more general middle ground.
 - Positional runs, league runs, and replacement runs are all typically agreed-upon values based on the position a player is fielding and the year the game was played in. In short, accounting for the fact that average defense at shortstop is worth more than a Designated Hitter (DH) and that someone hitting .300 in 2026 is rarer than in 1946.
 
@@ -170,10 +190,12 @@ roster_cost |>
   transmute(
     Season = season,
     `Windows` = windows,
-    `WAR in 6 games` = fwar_6g,
-    `PA in 6 games` = pa_6g
+    `WAR in 6 games` = sprintf("%+.3f", fwar_6g),
+    `WAR per 162` = sprintf("%+.3f", fwar_per_game * 162),
+    `PA in 6 games` = sprintf("%.3f", pa_6g)
   ) |>
-  kable(format = "latex", booktabs = TRUE, digits = 3, align = c("r", "r", "r", "r"))
+  kable(format = "latex", booktabs = TRUE, linesep = "",
+        align = c("r", "r", "r", "r", "r"))
 ```
 
 ## Comparison of 12-batter and 13-batter rosters
@@ -249,7 +271,7 @@ ggplot(splits_long, aes(distance_ft, time, color = Runner, group = Runner)) +
 
 The race margin is the runner's arrival time at second base minus the tag's arrival time. A negative margin is safe; a margin of zero or more is out. Both clocks start when the runner breaks for second. We built the runner's clock from Seville's 2024 Paris Summer Olympics splits. Given the difference in how reaction time is measured between MLB and the Olympics, Seville's launch appears ordinary, so he takes a normal primary lead of 10.5 to 12.5 feet and gains nothing significant compared to normal MLB runners before the pitch is thrown. From a lead of (on average) 11.7 feet he has 78.3 feet to cover.
 
-@fig-race shows the result. Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.279 seconds after first movement, against 3.564 seconds for the average runner who attempts a steal. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. We will assume the worst-case scenario that Seville will always face Realmuto, so a 1.86s pop time.
+@fig-race shows the result. Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.279 seconds after first movement, against 3.564 seconds for the average runner who attempts a steal. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. As a stringent catcher benchmark, we assume that Seville always faces Realmuto's 2025 mean pop time of 1.86 s.
 
 ```{r}
 #| label: fig-race
@@ -287,7 +309,7 @@ ggplot(gd, aes(m, dd)) +
 
 The throw reaches second base at 3.246 seconds, marginally ahead of the runner. Seville is normally safe because we estimate that, based on stolen base attempts from 2021-2025, applying the tag takes roughly a further 0.328 seconds. All things considered, Seville will beat the tag by an average 0.295 seconds.
 
-We model the race margin as a logistic distribution centred on the 0.295 second margin above, and we assign it a scale parameter of 0.113 seconds. This scale was found from observing tracked throws and stolen base attempts to find an estimate for variance in stolen base attempts. This provides the safe rate visible in @fig-race of 93.1%.
+We model the race margin as a logistic distribution centred on the 0.295 second margin above, and we assign it a scale parameter of 0.113 seconds. This scale was found from observing tracked throws and stolen base attempts to find an estimate for variance in stolen base attempts. Under these timing and variance assumptions, the model implies a 93.1% safe rate visible in @fig-race.
 
 ## Run value of one steal attempt
 
@@ -301,7 +323,7 @@ The addition of all expected runs over the course of the season provides the val
 
 ## The substitution cost
 
-MLB rules do not let the original runner return after the sprinter enters the game [@mlb_rules2019]. Therefore, we have to account for the very small value that is lost by having to substitute what is likely a worse position player in afterwards. We calculate the value of the remaining batting and fielding of the original player. We subtract the value of the replacement player. The difference is the substitution cost.
+MLB rules do not let the original runner return after the sprinter enters the game [@mlb_rules2019]. We estimate the direct substitution cost as the remaining offensive and defensive value of the original player minus that of his replacement. This estimate does not include the broader cost of preserving another bench player for later defensive substitution.
 
 This substitution cost depends entirely on when the sprinter is substituted in: there will be more plate appearances left in the game if it's the sixth inning compared to the tenth inning. We compare the run value to that of a replacement-level player per PA multiplied by the expected amount of PAs remaining.
 
@@ -371,7 +393,7 @@ We examine each real plate appearance with a runner on first base and second bas
 
 On an immediate steal attempt after the pinch runner is substituted into the game, the model combines the win probability after a safe steal with the win probability after an out. It gives each result the weight of its modeled probability. It then subtracts the value that the team loses when the original player leaves the game. For the alternative (leaving the sprinter on the bench and using the runner on base), the model uses the observed plate-appearance results to calculate the win probability after the next opportunity. The rule is given in @tbl-rule, which explains when to use the sprinter.
 
-To find the actual run value a team would find in a season using this model, we replayed each 2021-2025 game state with the completed rule. We also used the substitution cost of its inning, half-inning, and out count. A division of the season totals by 30 teams gives the reported value for each team. Using this model in a real-world situation, we can find the actual value of a sprinter over the course of a season.
+To estimate seasonal value, we applied the completed rule to each eligible 2021-2025 game state. We also used the substitution cost of its inning, half-inning, and out count. A division of the season totals by 30 teams gives the reported value for each team.
 
 ```{r}
 #| label: tbl-rule
@@ -390,7 +412,7 @@ read_csv(file.path("output", "reproducibility", "game_state_decisions.csv"),
       worst >= 0, sprintf("level or ahead"),
       sprintf("no more than %d run%s behind", -worst, ifelse(-worst == 1, "", "s")))
   ) |>
-  kable(format = "latex", booktabs = TRUE, align = c("r", "r", "l"))
+  kable(format = "latex", booktabs = TRUE, linesep = "", align = c("r", "r", "l"))
 ```
 
 ## Stealing third base
@@ -430,9 +452,9 @@ The break-even rate is higher at third base, and it changes sharply with the out
 
 The standard 13th batter, on average, produced -0.498 WAR for each 162 games. The 12-player and 13-player comparison did not show a reliable rest effect, so the study adds no rest value. The total value of Option A is -0.498 WAR. This makes sense, considering the "worst" player on a roster will usually be at or around "replacement level".
 
-Option B, the sprinter, produced 0.795 net WAR across an average 70.3 uses over the course of the season. Using the sprinter is worth 1.293 WAR more than the 13th batter. 
+Under the primary steal-of-second model, the sprinter produced 0.795 net WAR across 70.3 mean uses per season, or 1.293 WAR more than the constructed marginal position player.
 
-The sprinter reaches second base safely on 65.5 of those uses. If he then attempts third base on each of them, he adds 8.11 runs for each team-season, which is 0.828 WAR. The combined programme is worth 1.623 WAR, or 2.121 WAR more than the 13th batter. We report the two bases separately. A steal of third base at this rate assumes an attempt frequency that no MLB runner has ever sustained.
+The sprinter reaches second base safely on 65.5 of those uses. If he then attempts third base on each of them, he adds 8.11 runs for each team-season, which is 0.828 WAR. The combined programme is worth 1.623 WAR, or 2.121 WAR more than the 13th batter. We report the two bases separately. The every-opportunity third-base estimate is an upper-bound scenario rather than a proposed deployment rule. A steal of third base at this rate assumes an attempt frequency that no MLB runner has ever sustained.
 
 The result comes from three separate conditions:
 
@@ -442,26 +464,22 @@ The result comes from three separate conditions:
 
 # Case study: the 2025 Miami Marlins
 
-To test the effects of an Olympic-caliber sprinter, we applied one to the 2025 Miami Marlins. He was used in 71 game states. Using a Monte Carlo simulation, we tested the effects of the sprinter assuming the calculated stolen base rates. We scored each game with a simple points system that can be roughly translated into wins:
+The following case study is intended to illustrate the proposed deployment rule in a team-specific setting. It is not a sensitivity analysis: the simulation retains the primary model's assumptions about steal-success probability, substitution cost, and player deployment.
+
+To test the effects of an Olympic-caliber sprinter, we applied one to the 2025 Miami Marlins. He was used in 71 game states. Using a Monte Carlo simulation, we tested the effects of the sprinter assuming the calculated stolen base rates. We scored each game with a simple points system:
 
 - If the Olympic-caliber sprinter were to score a run in a game that the Marlins lost, and that the extra run turns into a tie, this counts as +0.5 points (to represent a 50% chance of victory).
 - If the Olympic-caliber sprinter were to score a run that changes the result from a loss to a win, this counts as +1.0 point. This happens when the real-life Marlins lost in extra innings when they could have won it inside the 9 innings using the sprinter.
 - The same rules apply in reverse: a win that becomes a tie counts as -0.5, and a win that becomes a loss counts as -1.0.
 - All other games count as zero.
 
-The 71 uses add roughly 21 total runs across the season. Across 400,000 simulated seasons the Marlins gain an estimated 1.34 wins and 5.05 ties. They give back 0.77 ties and 0.40 wins. The net result is 3.07 points for each season, and the sprinter improves the record in 98.3% of the simulated seasons. So, the sprinter is worth roughly 3.07 wins in actually-simulated situations. Considering only Win Probability Added (WPA), which does not take into account the actual result of the game, the same 71 uses give the sprinter 3.005 WPA across the season. Of this, 1.528 WPA comes from the steal of second base and 1.477 WPA from the steal of third base.
+The 71 uses add roughly 21 total runs across the season. Across 400,000 simulated seasons the Marlins gain an estimated 1.34 wins and 5.05 ties. They give back 0.77 ties and 0.40 wins. The net result is 3.07 points per season under this scoring rule, and the sprinter improves the simulated record in 98.3% of seasons. Across the same 71 uses, the modeled cumulative WPA was 3.005: 1.528 from steals of second and 1.477 from steals of third.
+
+The Marlins simulation provides an illustration of how the strategy could affect one team-season under the baseline assumptions. A complete robustness analysis would additionally vary the principal uncertain inputs, particularly the safe rate and the cost of replacing the original player after the pinch-running substitution.
 
 # Limitations
 
-We only take into account stealing second base and stealing third base. First-to-third advances, runs scored from second base, and other possible baserunning factors are difficult to accurately model due to data availability issues.
-
-It is very difficult to track the effect of rest on injuries. Besides in-depth investigations into the individual causes of certain injuries, it is extremely challenging to tell the exact "injury prevention" value rest carries.
-
-It is possible that the introduction of a sprinter will lead to pitchouts. Pitchouts have been generally abandoned due to their perceived negative value, but it is possible that teams would begin using pitchouts specifically to combat the sprinter. We cannot know with certainty how teams would respond to this scenario.
-
-A negative against the Olympic-caliber sprinter is that teams are effectively barred from using their 12th batter efficiently as well. Instead of potentially using the 12th batter as a platoon bat or as a general pinch hitter, teams would have to keep the 12th batter on the bench in case the Olympic-caliber sprinter comes into the game. Given the difficulty of consistently predicting when a bench player would be substituted into a game, we cannot correctly account for this.
-
-In each MLB season, during September, teams are allowed to roster 28 players on the active roster instead of the usual 26. In this case, using the sprinter clearly becomes even more favorable. However, the relatively small sample size of a single month makes it difficult to confidently analyze exactly how much value a 14th batter would provide. Additionally, teams occasionally use 15 pitchers and 13 batters instead of an even 14-14 split.
+This analysis includes only steals of second and third base; it excludes other potential baserunning gains, including advancement on balls in play and scoring from second. It also does not model player-specific value of the incumbent runner, pitcher delivery times, pickoffs, pitchouts, or other defensive responses to an elite sprinter. The substitution estimate captures the direct remaining offensive and defensive value of the replaced player, but not the broader loss of bench flexibility when another position player must be reserved for later defensive substitution. Finally, the 12- versus 13-position-player comparison does not identify the effects of roster depth on injuries or fatigue. September's 28-player roster may increase the strategy's value, but the available sample is limited.
 
 # Conclusion
 
