@@ -3,7 +3,7 @@
 #
 # engine_07_windows.sql hardcodes a six-game window in three places: the window
 # admissibility bound, the window/game join, and the per-game fWAR divisor. This
-# runs that same SQL, unmodified on disk, for L = 3..9 against the repaired
+# runs that same SQL, unmodified on disk, for L = 4..8 against the repaired
 # roster panel the published results use, and writes one rolling parquet per L.
 #
 #   scripts/window_length_sensitivity.sh [roster.parquet]
@@ -26,7 +26,7 @@ mkdir -p "$OUTDIR"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-for L in 3 4 5 6 7 8 9; do
+for L in 4 5 6 7 8; do
   off=$((L - 1))
   ROLLING="$OUTDIR/thirteenth_man_${L}game_rolling.parquet"
   DETAIL="$work/detail_${L}.parquet"

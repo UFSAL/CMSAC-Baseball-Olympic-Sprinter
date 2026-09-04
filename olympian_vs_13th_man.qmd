@@ -18,6 +18,11 @@ format:
     include-in-header:
       text: |
         \usepackage{booktabs}
+        \usepackage{amssymb}
+        \usepackage{colortbl}
+        \definecolor{gogreen}{HTML}{C3E6C8}
+        \definecolor{holdyellow}{HTML}{FBE8A6}
+        \definecolor{stopred}{HTML}{F5C2C0}
         \usepackage{float}
         \floatplacement{table}{H}
         \usepackage{fancyhdr}
@@ -146,38 +151,13 @@ All parts of the analysis use the 2021-2025 MLB seasons to account for the exist
 
 Although MLB teams usually only have 13 batters on their 26-man roster at any given moment in time, over the course of a season teams can use upwards of 20 different batters. We use overlapping six-game windows to identify the least-used stable non-catcher position player at each point in the season.
 
-Six games approximately represent one week of MLB play and provide a practical balance between short-window variability and roster changes accumulated over longer windows. Six games give players several batting opportunities and also limit the number of roster changes. A longer window would include more roster changes and more injuries, while a shorter one could introduce more variance.
+Six games approximately represent one week of MLB play and provide a practical balance between short-window variability and roster changes accumulated over longer windows. Six games give players several batting opportunities and also limit the number of roster changes. A longer window would include more roster changes and more injuries, while a shorter one could introduce more variance. These windows overlap. The first window would hold games 1 to 6. The next window holds games 2 to 7. The overlap gives a new roster observation after each game. Our model uses them to describe roster use. A player entered the candidate pool only when he was active on all six dates of a window. This rule prevents a short stint on a roster from setting the 13th batter. The two players with the most season-to-date innings caught were excluded, because the catcher position is more gruelling to play than any other and it is practically impossible to not roster at least two.
 
-We conducted a sensitivity analysis on the six-game window to see if a different length window would produce materially different results, but we found the eventual WAR benefits of the 13th batter to remain roughly the same. Due to the logic behind MLB scheduling, we decided that the six-game window made the most practical sense to continue using. @tbl-windowlen gives the comparison.
-
-```{r}
-#| label: tbl-windowlen
-#| tbl-cap: "Window-length sensitivity of the 13th-batter selection, 2021-2025"
-
-read_csv(file.path("output", "sensitivity", "window_length", "window_length_summary.csv"),
-         show_col_types = FALSE) |>
-  transmute(
-    Window = window_len,
-    `PA in window` = sprintf("%.2f", pa_in_window),
-    `Zero-PA` = percent(zero_pa_share, accuracy = 0.1),
-    `WAR per 162` = sprintf("%+.3f", war_per_162),
-    `Match to six-game` = percent(same_player_as_6g, accuracy = 0.1)
-  ) |>
-  kable(format = "latex", booktabs = TRUE, linesep = "",
-        align = c("r", "r", "r", "r", "r"))
-```
-
-These windows overlap. The first window would hold games 1 to 6. The next window holds games 2 to 7. The overlap gives a new roster observation after each game. Our model uses them to describe roster use.
-
-The project put each team's games in official schedule order and examined each six-game window. A player entered the candidate pool only when he was active on all six dates. This rule prevents a short stint on a roster from setting the 13th batter. The two players with the most season-to-date innings caught were excluded, because the catcher position is more gruelling to play than any other and it is practically impossible to not roster at least two.
-
-The player with the fewest plate appearances (PA) in the window became the 13th batter. Ties used the season-to-date PA first, then the in-window playing time, then randomly. In 14% of the windows, the selected player had zero PA.
-
-The project then calculated WAR for each player-game, which permits an exact six-game total. WAR is a summation of runs generated through batting, stolen-base, fielding, positional, league, and replacement runs [@fangraphs_war].
+The player with the fewest plate appearances (PA) in the window became the "13th batter". Ties used the season-to-date PA first, then the in-window playing time, then randomly. In 14% of the windows, the selected player had zero PA. We then calculated WAR for each player-game, which permits an exact six-game total. WAR is a summation of runs generated through batting, stolen-base, fielding, positional, league, and replacement runs [@fangraphs_war].
 
 - Batting runs were calculated using Run Expectancy 24 (RE24) [@fangraphs_re24], which calculates the expected run value a player generated in each specific PA.
-- Stolen-base runs were calculated using wSB. This was used instead of a different statistic like Ultimate Base Running (UBR) [@fangraphs_ubr] due to differences in how baserunning value is assigned. Additionally, the sprinter will only be assigned stolen-base runs, so it evens out between both options.
-- Fielding runs are incredibly difficult to assign due to widespread disagreement in the best way to do so. This paper chose to use a simpler and older statistic, Zone Rating (ZR), due to unavailability and unreliability of statistics like Defensive Runs Saved (DRS), Ultimate Zone Rating (UZR), and Outs Above Average (OAA). These statistics each have critics and propenents, which is why this paper chose a more general middle ground.
+- Stolen-base runs were calculated using wSB. This was used instead of a different statistic like Ultimate Base Running (UBR) [@fangraphs_ubr] due to differences in how baserunning value is assigned.
+- Fielding runs are difficult to assign due to widespread disagreement in the best way to do so. This paper chose to use a simpler and older statistic, Zone Rating (ZR), due to unavailability and unreliability of statistics like Defensive Runs Saved (DRS), Ultimate Zone Rating (UZR), and Outs Above Average (OAA). These statistics each have critics and proponents, which is why this paper chose a more general middle ground.
 - Positional runs, league runs, and replacement runs are all typically agreed-upon values based on the position a player is fielding and the year the game was played in. In short, accounting for the fact that average defense at shortstop is worth more than a Designated Hitter (DH) and that someone hitting .300 in 2026 is rarer than in 1946.
 
 @tbl-thirteenth gives the results of the analysis, with the 13th batter usually performing slightly below replacement level.
@@ -193,6 +173,25 @@ roster_cost |>
     `WAR in 6 games` = sprintf("%+.3f", fwar_6g),
     `WAR per 162` = sprintf("%+.3f", fwar_per_game * 162),
     `PA in 6 games` = sprintf("%.3f", pa_6g)
+  ) |>
+  kable(format = "latex", booktabs = TRUE, linesep = "",
+        align = c("r", "r", "r", "r", "r"))
+```
+
+We conducted a sensitivity analysis on the six-game window to see if a different length window would produce materially different results, but we found the eventual WAR benefits of the 13th batter to remain roughly the same. Due to the logic behind MLB scheduling, we decided that the six-game window made the most practical sense to continue using. @tbl-windowlen gives the comparison.
+
+```{r}
+#| label: tbl-windowlen
+#| tbl-cap: "Window-length sensitivity of the 13th-batter selection, 2021-2025"
+
+read_csv(file.path("output", "sensitivity", "window_length", "window_length_summary.csv"),
+         show_col_types = FALSE) |>
+  transmute(
+    Window = window_len,
+    `PA in window` = sprintf("%.2f", pa_in_window),
+    `Zero-PA` = percent(zero_pa_share, accuracy = 0.1),
+    `WAR per 162` = sprintf("%+.3f", war_per_162),
+    `Match to six-game` = percent(same_player_as_6g, accuracy = 0.1)
   ) |>
   kable(format = "latex", booktabs = TRUE, linesep = "",
         align = c("r", "r", "r", "r", "r"))
@@ -271,45 +270,12 @@ ggplot(splits_long, aes(distance_ft, time, color = Runner, group = Runner)) +
 
 The race margin is the runner's arrival time at second base minus the tag's arrival time. A negative margin is safe; a margin of zero or more is out. Both clocks start when the runner breaks for second. We built the runner's clock from Seville's 2024 Paris Summer Olympics splits. Given the difference in how reaction time is measured between MLB and the Olympics, Seville's launch appears ordinary, so he takes a normal primary lead of 10.5 to 12.5 feet and gains nothing significant compared to normal MLB runners before the pitch is thrown. From a lead of (on average) 11.7 feet he has 78.3 feet to cover.
 
-@fig-race shows the result. Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.279 seconds after first movement, against 3.564 seconds for the average runner who attempts a steal. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. As a stringent catcher benchmark, we assume that Seville always faces Realmuto's 2025 mean pop time of 1.86 s.
+Using a kinematic model that accounts both for acceleration and slide deceleration, Seville reaches second base roughly 3.279 seconds after first movement, against 3.564 seconds for the average runner who attempts a steal. For catchers in the 2025 MLB season, the one with the lowest average pop time was J.T. Realmuto, averaging 1.86s. As a stringent catcher benchmark, we assume that Seville always faces Realmuto's 2025 mean pop time of 1.86 s.
 
-```{r}
-#| label: fig-race
-#| fig-cap: "Race-margin distribution against a 1.86-second pop time. The margin is the runner’s arrival time minus the tag’s arrival time, so everything left of zero is a safe steal."
-#| fig-width: 7.0
-#| fig-height: 2.5
-
-BLUE <- "#2a78d6"; ORANGE <- "#eb6834"; INK <- "#0b0b0b"; INK2 <- "#52514e"; SURF <- "#ffffff"
-
-gd <- tibble(m = seq(-0.56, 0.24, length.out = 800)) |>
-  mutate(dd = dlogis(m, race_margin_center, race_margin_spread))
-ggplot(gd, aes(m, dd)) +
-  geom_area(data = filter(gd, m < 0), fill = BLUE, alpha = 0.22) +
-  geom_line(colour = BLUE, linewidth = 0.6) +
-  geom_vline(xintercept = 0, colour = ORANGE, linewidth = 0.6) +
-  annotate("text", x = -0.295, y = 1.25, size = 2.6, colour = INK, fontface = "bold",
-           lineheight = 0.95,
-           label = sprintf("%s of attempts land\non the safe side of 0",
-                           percent(p_safe, accuracy = 0.1))) +
-  annotate("text", x = 0.035, y = 2.1, label = "tag wins", size = 2.4, colour = ORANGE,
-           fontface = "bold", hjust = 0) +
-  scale_x_continuous(breaks = c(-0.75, -0.5, -0.295, -0.12, 0),
-                     labels = c("-0.75", "-0.5", "-0.295", "-0.12", "0"),
-                     limits = c(-0.78, 0.20)) +
-  scale_y_continuous(limits = c(0, 2.9), expand = expansion(mult = c(0, 0.02))) +
-  labs(x = "race margin (s):  runner arrival minus tag arrival", y = NULL,
-       title = "Spread around the median margin gives the safe rate") +
-  theme_minimal(base_size = 9) +
-  theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank(),
-        panel.grid.major.x = element_line(linewidth = 0.2, colour = "grey90"),
-        axis.text.y = element_blank(), axis.title = element_text(size = 7.6, colour = INK2),
-        plot.title = element_text(face = "bold", size = 8.4, colour = INK),
-        plot.background = element_rect(fill = SURF, colour = NA))
-```
 
 The throw reaches second base at 3.246 seconds, marginally ahead of the runner. Seville is normally safe because we estimate that, based on stolen base attempts from 2021-2025, applying the tag takes roughly a further 0.328 seconds. All things considered, Seville will beat the tag by an average 0.295 seconds.
 
-We model the race margin as a logistic distribution centred on the 0.295 second margin above, and we assign it a scale parameter of 0.113 seconds. This scale was found from observing tracked throws and stolen base attempts to find an estimate for variance in stolen base attempts. Under these timing and variance assumptions, the model implies a 93.1% safe rate visible in @fig-race.
+We model the race margin as a logistic distribution centred on the 0.295 second margin above, and we assign it a scale parameter of 0.113 seconds. This scale was found from observing tracked throws and stolen base attempts to find an estimate for variance in stolen base attempts. Under these timing and variance assumptions, the model implies a 93.1% safe rate.
 
 ## Run value of one steal attempt
 
@@ -331,7 +297,7 @@ This substitution cost depends entirely on when the sprinter is substituted in: 
 
 ```{r}
 #| label: fig-subcost
-#| fig-cap: "Run expectancy lost to the substitution, for every state in which the rule uses the sprinter. The bench player who replaces the original batter is worth less, but only for the plate appearances and defensive innings that remain."
+#| fig-cap: "Run expectancy lost to the substitution, for every state in which the rule uses the sprinter."
 #| fig-width: 7.0
 #| fig-height: 2.4
 
@@ -397,31 +363,68 @@ To estimate seasonal value, we applied the completed rule to each eligible 2021-
 
 ```{r}
 #| label: tbl-rule
-#| tbl-cap: "When to use the sprinter, from the game-state model"
+#| tbl-cap: "When to use the sprinter, from the game-state model. Each cell reports the model's decision for that inning and out count; the legend below gives the run differential each symbol stands for."
 
-read_csv(file.path("output", "reproducibility", "game_state_decisions.csv"),
-         show_col_types = FALSE) |>
-  filter(toupper(decision) == "USE", inning >= 6) |>
+# min_diff is the worst batting-team run differential at which the model still
+# says USE. The value function runs to the twelfth inning with the automatic
+# runner, so the extra-inning states are solved, not extrapolated.
+rule_grid <- read_csv(file.path("output", "reproducibility", "game_state_decisions.csv"),
+                      show_col_types = FALSE) |>
+  filter(inning >= 6) |>
   group_by(inning, outs) |>
-  summarise(worst = min(batting_score_diff), .groups = "drop") |>
-  arrange(inning, outs) |>
-  transmute(
-    Inning = inning,
-    Outs = outs,
-    `Use when the batting team is` = ifelse(
-      worst >= 0, sprintf("level or ahead"),
-      sprintf("no more than %d run%s behind", -worst, ifelse(-worst == 1, "", "s")))
-  ) |>
-  kable(format = "latex", booktabs = TRUE, linesep = "", align = c("r", "r", "l"))
+  summarise(
+    min_diff = if (any(toupper(decision) == "USE")) {
+      min(batting_score_diff[toupper(decision) == "USE"])
+    } else {
+      NA_real_
+    },
+    .groups = "drop"
+  )
+
+# Innings 10 and later are one repeating extra-inning state; collapse them only
+# if the model actually gives them the same rule.
+extra <- rule_grid |> filter(inning >= 10)
+if (dplyr::n_distinct(paste(extra$outs, extra$min_diff)) != 3L) {
+  stop("Extra innings do not share a single rule; report them separately.")
+}
+
+paint <- function(d) {
+  if (is.na(d)) return("\\cellcolor{stopred}$\\times$")
+  if (d <= -1)  return("\\cellcolor{gogreen}$\\checkmark$")
+  "\\cellcolor{holdyellow}\\textendash"
+}
+
+rule_grid |>
+  mutate(inning_label = ifelse(inning >= 10, "10+", as.character(inning))) |>
+  group_by(inning_label, outs) |>
+  summarise(min_diff = min(min_diff), .groups = "drop") |>
+  mutate(cell = vapply(min_diff, paint, character(1))) |>
+  select(inning_label, outs, cell) |>
+  pivot_wider(names_from = outs, values_from = cell) |>
+  arrange(match(inning_label, c("6", "7", "8", "9", "10+"))) |>
+  rename(Inning = inning_label, `0 outs` = `0`, `1 out` = `1`, `2 outs` = `2`) |>
+  kable(format = "latex", booktabs = TRUE, linesep = "", escape = FALSE,
+        align = c("r", "c", "c", "c"))
+```
+
+```{=latex}
+\vspace{-0.4em}
+\begin{center}
+\small
+\begin{tabular}{@{}cl@{}}
+\multicolumn{2}{@{}l}{\textbf{Legend}}\\[2pt]
+\cellcolor{gogreen}\makebox[1.6em]{$\checkmark$} & Use when the batting team is level, ahead, or trailing by one run ($\geq -1$)\\[1pt]
+\cellcolor{holdyellow}\makebox[1.6em]{\textendash} & Use only when the batting team is level or ahead ($\geq 0$)\\[1pt]
+\cellcolor{stopred}\makebox[1.6em]{$\times$} & Do not use at any run differential\\
+\end{tabular}
+\end{center}
 ```
 
 ## Stealing third base
 
-The sprinter is on second base after a successful steal. We apply the same model to a steal of third base. Only three inputs change: the distance, the catcher's pop time, and the run values. Seville must cover 70.1 feet.
+The sprinter is on second base after a successful steal. We apply the same model to a steal of third base. Only three inputs change: the distance, the catcher's pop time, and the run values. Seville must cover 70.1 feet. Baseball Savant records catcher throws to third base as well as to second [@savant_throwing]. The archive holds 2,103 tracked throws to third base between 2021 and 2025, and 1,095 of these also carry a pop time.
 
-Baseball Savant records catcher throws to third base as well as to second [@savant_throwing]. The archive holds 2,103 tracked throws to third base between 2021 and 2025, and 1,095 of these also carry a pop time. The scale from that sample is 0.104 seconds, against 0.113 seconds for the throw to second base. Two separate races and two separate samples give almost the same spread, which supports the structure of the model.
-
-J.T. Realmuto averaged 1.41 seconds on his throws to third base in 2025, and we again give the sprinter that catcher on every attempt. Seville reaches third base 3.027 seconds after first movement, against 3.274 seconds for the average runner who attempts a steal. The model gives him a safe rate of 92.2%.
+The scale we calculate from that sample is 0.104 seconds, against 0.113 seconds for the throw to second base. Two separate races and two separate samples give almost the same spread, which supports the structure of the model. J.T. Realmuto averaged 1.41 seconds on his throws to third base in 2025, and we again give the sprinter that catcher on every attempt. Seville reaches third base 3.027 seconds after first movement, against 3.274 seconds for the average runner who attempts a steal. The model gives him a safe rate of 92.2%.
 
 A steal of third base is not worth the same as a steal of second base. The gain is almost equal, but the cost of an out is much larger. The defence removes a runner who is already in scoring position. @tbl-third gives the run values from the 2021-2025 RE24 table.
 

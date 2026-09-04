@@ -722,9 +722,9 @@ solve_with_option <- function(side, tolerance = 1e-10,
          " team.")
   }
 
-  decision_rows <- vector("list", 9L * 21L * 3L)
+  decision_rows <- vector("list", max_inning * 21L * 3L)
   row_number <- 0L
-  for (inning in 1:9) {
+  for (inning in 1:max_inning) {
     for (batting_difference in -10:10) {
       home_difference <- if (side == "home") {
         batting_difference

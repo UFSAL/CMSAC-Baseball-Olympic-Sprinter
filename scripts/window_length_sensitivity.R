@@ -13,7 +13,7 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
-lengths <- 3:9
+lengths <- 4:8
 indir <- file.path("output", "sensitivity", "window_length")
 outdir <- indir
 
