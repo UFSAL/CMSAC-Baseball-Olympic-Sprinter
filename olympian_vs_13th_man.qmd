@@ -153,7 +153,7 @@ Although MLB teams usually only have 13 batters on their 26-man roster at any gi
 
 Six games approximately represent one week of MLB play and provide a practical balance between short-window variability and roster changes accumulated over longer windows. Six games give players several batting opportunities and also limit the number of roster changes. A longer window would include more roster changes and more injuries, while a shorter one could introduce more variance. These windows overlap. The first window would hold games 1 to 6. The next window holds games 2 to 7. The overlap gives a new roster observation after each game. Our model uses them to describe roster use. A player entered the candidate pool only when he was active on all six dates of a window. This rule prevents a short stint on a roster from setting the 13th batter. The two players with the most season-to-date innings caught were excluded, because the catcher position is more gruelling to play than any other and it is practically impossible to not roster at least two.
 
-The player with the fewest plate appearances (PA) in the window became the "13th batter". Ties used the season-to-date PA first, then the in-window playing time, then randomly. In 14% of the windows, the selected player had zero PA. We then calculated WAR for each player-game, which permits an exact six-game total. WAR is a summation of runs generated through batting, stolen-base, fielding, positional, league, and replacement runs [@fangraphs_war].
+The player with the fewest plate appearances (PA) in the window became the "13th batter". Ties used the season-to-date PA first, then the in-window playing time, then randomly. In 14% of the windows, the selected player had zero PA. We then calculated WAR for each player-game, which permits a six-game total. WAR is a summation of runs generated through batting, stolen-base, fielding, positional, league, and replacement runs [@fangraphs_war].
 
 - Batting runs were calculated using Run Expectancy 24 (RE24) [@fangraphs_re24], which calculates the expected run value a player generated in each specific PA.
 - Stolen-base runs were calculated using wSB. This was used instead of a different statistic like Ultimate Base Running (UBR) [@fangraphs_ubr] due to differences in how baserunning value is assigned.
@@ -201,7 +201,7 @@ read_csv(file.path("output", "sensitivity", "window_length", "window_length_summ
 
 The value of rest is difficult to quantify, but it is still the main anectodal reason to opt against using the Olympian. The way we chose to evaluate the value of the 13th batter is to compare team batting performance during windows where 26-man rosters had 12 batters compared to when they had 13.
 
-The sample holds 2,488 team-games with 12 batters and 13,336 team-games with 13 batters. The raw values were -0.001379 runs for each plate appearance with 12 batters and +0.001196 runs with 13 batters. The adjusted comparison gives each team-game a weight equal to its number of plate appearances and controls for the team and the season. It gives a change of +0.000907 runs for each plate appearance. The 95% confidence interval is -0.003920 to +0.005734, and the p-value is 0.704. The p-value is high, so the data do not show a reliable rest effect. The study gives the rest value a zero WAR effect.
+The sample holds 2,488 team-games with 12 batters and 13,336 team-games with 13 batters. The raw values were -0.001379 runs for each plate appearance with 12 batters and +0.001196 runs with 13 batters. The adjusted comparison gives each team-game a weight equal to its number of plate appearances and controls for the team and the season. The estimated value was small and imprecise, so the primary analysis includes no separately estimated rest value.
 
 ## A race model
 
@@ -453,7 +453,7 @@ The break-even rate is higher at third base, and it changes sharply with the out
 
 # Results
 
-The standard 13th batter, on average, produced -0.498 WAR for each 162 games. The 12-player and 13-player comparison did not show a reliable rest effect, so the study adds no rest value. The total value of Option A is -0.498 WAR. This makes sense, considering the "worst" player on a roster will usually be at or around "replacement level".
+The standard 13th batter, on average, produced -0.498 WAR for each 162 games. Because the rest analysis did not produce a precise positive value, the primary comparison includes no separately estimated rest value. The total value of Option A is -0.498 WAR. This makes sense, considering the "worst" player on a roster will usually be at or around "replacement level".
 
 Under the primary steal-of-second model, the sprinter produced 0.795 net WAR across 70.3 mean uses per season, or 1.293 WAR more than the constructed marginal position player.
 
@@ -486,7 +486,7 @@ This analysis includes only steals of second and third base; it excludes other p
 
 # Conclusion
 
-Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, a steal of second base adds an estimated 1.293 wins of run value over a 162-game season. A steal of third base on each successful attempt raises this to 2.121 wins. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
+Using an Olympic-caliber sprinter as a dedicated pinch runner generates greater expected run value than using the 26th roster spot on a conventional position player. Under the proposed deployment rule, a steal of second base adds an estimated 1.293 WAR advantage over a constructed marginal position player over 162 games. A steal of third base on each successful attempt raises this to 2.121 WAR. Although this estimate depends on the runner’s assumed safe rate and the game-state decision rule, simulated differences in team quality have little effect on the result. The value of the strategy therefore appears to stem primarily from the specialist’s elite baserunning skill and targeted deployment, rather than from the quality of the team employing him.
 
 \newpage
 
