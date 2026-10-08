@@ -1,5 +1,4 @@
 ---
-title: "Feasibility of Using Major League Baseball 26-man Roster Spot on an Olympic-caliber Sprinter"
 bibliography: references.bib
 link-citations: true
 format:
@@ -25,15 +24,9 @@ format:
         \definecolor{stopred}{HTML}{F5C2C0}
         \usepackage{float}
         \floatplacement{table}{H}
-        \usepackage{fancyhdr}
         \usepackage{longtable}
         \usepackage{caption}
         \captionsetup{font=small}
-        \pagestyle{fancy}
-        \fancyhf{}
-        \lhead{\small Olympic Sprinter as a Pure Pinch Runner}
-        \cfoot{\thepage}
-        \setlength{\headheight}{14pt}
         \AtBeginDocument{\hypersetup{pdfauthor={},pdfsubject={},pdfkeywords={},pdfcreator={},pdfproducer={}}}
 execute:
   echo: false
@@ -41,6 +34,29 @@ execute:
   message: false
 editor: source
 ---
+
+\vspace*{-3.5em}
+\begin{center}
+  {\LARGE Feasibility of Using Major League Baseball 26-man\\[0.1em]
+  Roster Spot on an Olympic-caliber Sprinter\par}
+
+  \vspace{1em}
+
+  {\large Christian Farese$^{1}$ \quad and \quad Dr.\ Scott Nestler$^{2}$\par}
+
+  \vspace{0.5em}
+
+  {\small
+  $^{1}$Department of Computer \& Information Science \& Engineering\\
+  $^{2}$Department of Sport Management\\
+  University of Florida, Gainesville, FL 32611, USA\par}
+
+  \vspace{0.4em}
+
+  {\small \texttt{cfarese@ufl.edu}, \texttt{nestler.scott@ufl.edu}\par}
+\end{center}
+
+\vspace{-1em}
 
 ```{r}
 #| label: setup
