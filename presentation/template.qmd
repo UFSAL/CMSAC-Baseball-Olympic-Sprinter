@@ -1,0 +1,54 @@
+---
+format:
+  ufsal-revealjs:
+    footer: "Presentation Title" # change this presentation title
+---
+
+## {.uf-title background-image="ubiguity_gus.png" background-size="cover"}
+
+![](UF_logo.png){.uf-mark}
+
+![](UFSAL_logo_white_interior.png){.sal-mark}
+
+::: {.title-block}
+Title Block
+:::
+
+::: {.subtitle-block}
+Presentation Title, Date
+:::
+
+::: {.presenter-block}
+Your Name Here
+
+Job
+
+Affiliation
+:::
+
+## Whatever you want to put here
+
+- Bullet point 1
+- Bullet point 2
+
+## There is a picture on this slide {.blue-panel}
+
+::: {.panel-text}
+It's the ubiguity statue but you can change it if you want
+:::
+
+![](ubiguity_gus.png){.nostretch width="60%"}
+
+## Thank you! {.thank-you}
+
+:::: {.columns .contact}
+
+::: {.column width="50%"}
+[linkedin_username](https://linkedin.com/in/linkedin_username)
+:::
+
+::: {.column width="50%"}
+Your Name Here
+:::
+
+::::

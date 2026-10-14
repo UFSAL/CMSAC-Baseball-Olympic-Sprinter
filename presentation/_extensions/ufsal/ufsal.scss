@@ -1,0 +1,286 @@
+/*-- scss:defaults --*/
+
+// uf brand colours, from the university colour sheet
+$uf-core-blue: #0021A5 !default;
+$uf-dark-blue: #002657 !default;
+$uf-core-orange: #FA4616 !default;
+
+$body-bg: #fff !default;
+$body-color: #000 !default;
+$link-color: $uf-core-blue !default;
+
+/*-- scss:rules --*/
+
+// presentation name, small blue italic caps at the top left
+.reveal .footer {
+  position: fixed;
+  top: 5%;
+  left: 6%;
+  bottom: auto !important;
+  width: auto !important;
+  text-align: left !important;
+  color: $uf-core-blue;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 0.55em;
+  letter-spacing: 0.2em;
+}
+
+// slide title, big orange italic, clear of the kicker above it
+.reveal h2 {
+  color: $uf-core-orange;
+  font-style: italic;
+  font-weight: 700;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+// slide content stays black, and small enough to fit the slide
+.reveal .slides section {
+  color: #000;
+}
+
+.reveal .slides section p,
+.reveal .slides section ul {
+  font-size: 0.65em;
+}
+
+.reveal .slides section ul ul {
+  font-size: 0.85em;
+}
+
+// blue bar across the bottom
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4%;
+  background-color: $uf-core-blue;
+  z-index: 2;
+}
+
+// uf mark, sits in the bottom left corner over the bar
+.reveal .slide-logo {
+  bottom: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  max-height: 9% !important;
+  margin: 0 !important;
+  z-index: 3 !important;
+}
+
+// slide number, white and inside the bar on the right
+.reveal .slide-number {
+  top: auto !important;
+  bottom: 0.8% !important;
+  right: 1.5% !important;
+  color: white;
+  font-weight: 700;
+  font-size: 0.5em;
+  z-index: 3;
+}
+
+// reveal stacks every slide at the same origin with position: absolute. a rule
+// that puts one slide back in normal flow (position: relative or static) makes
+// it occupy real height inside .slides, which pushes the static position of
+// every later slide down the canvas and off the screen, so those slides render
+// blank. pin the slides so one layout can never move the ones after it.
+// overview, scroll and print modes override this with !important, and reveal's
+// inline top (used when center: true) still wins, so nothing else breaks
+.reveal .slides > section,
+.reveal .slides > section > section {
+  position: absolute;
+  top: 0;
+}
+
+// blue panel layout: add {.blue-panel} to the slide heading, and wrap the
+// panel text in a ::: {.panel-text} div. everything else shifts to the right
+body:has(section.blue-panel.present)::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 35%;
+  background-color: $uf-core-blue;
+  z-index: 1;
+}
+
+body:has(section.blue-panel.present) .footer {
+  left: 40%;
+}
+
+.reveal section.blue-panel h2,
+.reveal section.blue-panel > *:not(.panel-text) {
+  margin-left: 32%;
+}
+
+// text over the panel, offset left of the slide area to reach into it
+.reveal section.blue-panel .panel-text {
+  position: absolute;
+  top: 30%;
+  left: -7.5%;
+  width: 32%;
+  color: white;
+  font-weight: 700;
+  font-style: italic;
+  z-index: 2;
+}
+
+// keep figures inside the white area to the right of the panel
+.reveal section.blue-panel img {
+  max-width: 100%;
+  max-height: 65vh;
+  width: auto;
+}
+
+.reveal section.blue-panel .panel-text p {
+  font-size: 0.8em;
+  margin-bottom: 1.5em;
+}
+
+// title slide: add {.uf-title background-image="your-photo.png" background-size="cover"}
+// to the slide heading. the bar, corner mark, kicker and slide number stay off it
+body:has(section.uf-title.present)::after,
+body:has(section.uf-title.present) .slide-logo,
+body:has(section.uf-title.present) .footer,
+body:has(section.uf-title.present) .slide-number {
+  display: none !important;
+}
+
+// orange rule across the photo, between the title and the presenter details
+body:has(section.uf-title.present)::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 64%;
+  height: 0.5%;
+  background-color: $uf-core-orange;
+  z-index: 2;
+}
+
+// the two marks that sit on the photo
+.reveal section.uf-title .uf-mark {
+  position: absolute;
+  top: 10%;
+  left: 8%;
+  width: 11%;
+  margin: 0;
+}
+
+.reveal section.uf-title .sal-mark {
+  position: absolute;
+  bottom: 3%;
+  right: 2%;
+  width: 15%;
+  margin: 0;
+}
+
+.reveal section.uf-title {
+  top: 0 !important;
+  height: 100%;
+  color: white;
+  font-style: italic;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.reveal section.uf-title .title-block {
+  position: absolute;
+  top: 5%;
+  left: 24%;
+  right: 4%;
+  font-size: 1.9em;
+  line-height: 1.2;
+}
+
+.reveal section.uf-title .subtitle-block {
+  position: absolute;
+  top: 56%;
+  left: 12%;
+  font-size: 1.2em;
+}
+
+.reveal section.uf-title .presenter-block {
+  position: absolute;
+  top: 75%;
+  left: 28%;
+  font-size: 0.6em;
+}
+
+.reveal section.uf-title .presenter-block p {
+  margin: 0 0 0.6em 0;
+}
+
+.reveal section.uf-title .presenter-block p:first-child {
+  font-size: 1.4em;
+}
+
+// thank you slide: add {.thank-you} to the slide heading. blue gradient block
+// across the top (90 degrees, per the brand guide), contacts on white below
+body:has(section.thank-you.present)::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72%;
+  background: linear-gradient(180deg, $uf-core-blue 0%, $uf-dark-blue 100%);
+  z-index: 0;
+}
+
+// the bar, logo, kicker and slide number stay off this slide
+body:has(section.thank-you.present)::after,
+body:has(section.thank-you.present) .slide-logo,
+body:has(section.thank-you.present) .footer,
+body:has(section.thank-you.present) .slide-number {
+  display: none !important;
+}
+
+// reveal sets an inline top to centre slide content; this layout places its
+// own pieces, so pin the section to the top of the canvas
+.reveal section.thank-you {
+  top: 0 !important;
+  height: 100%;
+}
+
+// placed absolutely so reveal does not recentre the slide around them
+.reveal section.thank-you h2 {
+  position: absolute;
+  z-index: 2;
+  top: 25%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  color: white;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 2.6em;
+  text-align: right;
+}
+
+.reveal section.thank-you .contact {
+  position: absolute;
+  z-index: 2;
+  top: 76%;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 4%;
+  font-size: 0.62em;
+}
+
+.reveal section.thank-you .contact a {
+  color: $uf-core-orange;
+}
+
+// orange rule down the left of the details column
+.reveal section.thank-you .contact .column:last-child {
+  border-left: 3px solid $uf-core-orange;
+  padding-left: 5%;
+  color: $uf-core-blue;
+  font-weight: 700;
+}
