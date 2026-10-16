@@ -35,3 +35,19 @@
 .reveal .figure-slide > p { font-size:.65em; margin-top:15px; }
 
 .reveal .figure-slide .rule-table-image { height:540px; max-height:540px; }
+
+/* Athlete photographs on the two v3 introduction slides. */
+.reveal .photo-layout { display:grid; grid-template-columns:minmax(0,1.75fr) minmax(0,1fr); gap:45px; align-items:start; }
+.reveal .photo-copy { min-width:0; }
+.reveal .photo-side { text-align:right; justify-self:end; width:100%; max-width:390px; }
+.reveal .photo-side p { margin:0; }
+.reveal .photo-side img.athlete-photo { display:block; width:auto; height:390px; max-width:100%; max-height:none; object-fit:contain; margin:0 0 10px auto; }
+.reveal .photo-side .photo-credit p { font-size:16px; line-height:1.3; margin:5px 0; color:#555; }
+.reveal .photo-credit a { color:#0021A5; }
+.reveal .photo-copy table { font-size:.58em; margin:24px 0; }
+.reveal .photo-copy table td,.reveal .photo-copy table th { padding:10px 14px; }
+.reveal .photo-copy li { font-size:1em; }
+.reveal .photo-copy ul ul { font-size:.85em; }
+
+.reveal .photo-side figcaption { display:none; }
+.reveal .photo-side figure { margin:0; }
