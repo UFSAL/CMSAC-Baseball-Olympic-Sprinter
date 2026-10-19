@@ -35,9 +35,9 @@ Christian Farese, Dr. Scott Nestler
 ::: {.notes}
 Today, we ask whether an Olympic-caliber sprinter could provide more value on an MLB roster than the final bench position player.
 
-The central tradeoff is speed versus depth: can a specialist runner’s baserunning gains outweigh the hitting, fielding, and flexibility the team gives up?
+The main tradeoff is speed versus depth: can a specialist runner’s baserunning outweigh the hitting, fielding, and flexibility the team gives up?
 
-We’ll walk through how we modeled that decision and what our results suggest.
+I’ll walk through how we modeled that decision and what our results suggest.
 
 This work was guided by Dr. Scott Nestler, Director of the UF Sports Analytics Lab.
 :::

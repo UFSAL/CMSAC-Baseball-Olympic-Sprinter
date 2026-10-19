@@ -51,3 +51,18 @@
 
 .reveal .photo-side figcaption { display:none; }
 .reveal .photo-side figure { margin:0; }
+
+.reveal .realmuto-slide .photo-layout { grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:40px; }
+.reveal .realmuto-slide .photo-side { max-width:600px; }
+.reveal .realmuto-slide .photo-side img.athlete-photo { width:100%; height:auto; max-height:360px; }
+.reveal .points-distribution-slide figcaption { display:none; }
+.reveal .points-distribution-slide .paper-figure { height:450px; max-height:450px; }
+
+/* Compact case-study table beside the points distribution. */
+.reveal .marlins-layout { display:grid; grid-template-columns:0.9fr 1.3fr; gap:35px; align-items:center; margin:24px 0; }
+.reveal .marlins-layout > div { min-width:0; }
+.reveal .marlins-table table { font-size:24px; margin:0; width:100%; }
+.reveal .marlins-table table th,.reveal .marlins-table table td { padding:12px 10px; }
+.reveal .marlins-chart figure,.reveal .marlins-chart p { margin:0; }
+.reveal .marlins-chart img { display:block; width:100%; height:auto; max-height:310px; object-fit:contain; }
+.reveal .marlins-chart figcaption { display:none; }
