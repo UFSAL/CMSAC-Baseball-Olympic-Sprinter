@@ -48,7 +48,7 @@ This work was guided by Dr. Scott Nestler, Director of the UF Sports Analytics L
 - 13th batter: hitting, fielding, and roster depth
 - Sprinter: stolen-base potential—but no hitting or fielding
 - Our analysis: Compare each of their run values over a season using 2021–2025 MLB data
-- The Oakland A's tried this experiment in the late 60's and early 70's to limited success, but we are assuming better runners, a more optimized usage strategy, and average baserunning instincts.
+- The Oakland A's tried this experiment in the late 60's and early 70's to limited success, but we are assuming better runners, a more optimized usage strategy, and average baserunning instincts
 
 ::: {.notes}
 Could a sprinter outperform the final position player on an MLB roster? MLB rosters have 26 players on the roster, split into 13 pitchers and 13 position players. Since pitchers have traditionally been rostered over hitters when the opportunity arrises, we examined removing the 13th position player (batter).
@@ -80,7 +80,7 @@ We also compared teams when they had 12 versus 13 position players. We found no 
 Over the course of a full season, the 13th batter averaged roughly a half win below replacement level.
 :::
 
-## Estimating the sprinter’s stolen-base success rate (1/2) {.photo-slide}
+## Estimating the sprinter’s stolen-base success rate (1/2) {.photo-slide .combined-splits-slide}
 
 :::: {.photo-layout}
 ::: {.photo-copy}
@@ -88,11 +88,8 @@ Over the course of a full season, the 13th batter averaged roughly a half win be
 - Compare his estimated 90-foot time with MLB sprint splits
 - Excluded reaction time from the comparison conservatively
 
-| Runner | Time to 90 feet |
-|---|---:|
-| Oblique Seville | 3.46 seconds |
-| Fastest MLB runner | 3.66 seconds |
-| MLB average | 4.05 seconds |
+![](assets/splits-labeled.svg){.nostretch .inline-splits-chart}
+
 :::
 ::: {.photo-side}
 
@@ -108,13 +105,7 @@ Photo: [Aeltegop](https://commons.wikimedia.org/wiki/User:Aeltegop) / [Wikimedia
 
 ::: {.notes}
 We selected one sprinter to use as a benchmark, Oblique Seville. Seville finished eighth at the 2024 Paris Olympics 100-meter final. Excluding reaction time, his estimated 90-foot time was 3.46 seconds, versus 3.66 for the fastest MLB runner and 4.05 for the MLB average.
-:::
 
-## Seville’s speed advantage grows over 90 feet {.figure-slide}
-
-![](assets/splits.png){.nostretch .paper-figure}
-
-::: {.notes}
 The figure shows cumulative time by distance; lower lines mean faster times. We were somewhat conservative removing the sprinter's reaction time to avoid allowing his block start to give him an advantage.
 :::
 
@@ -230,6 +221,7 @@ Something interesting to consider is that teams closer to .500 who experience mo
 - Readiness: Assume adequate baserunning skills and physical preparation
 - Scope: Model steals of second and third, not other advancement
 - Roster costs: Incompletely capture rest needs and bench flexibility
+- Defensive strategies: More pickoff attempts or the reintroduction of pitchouts
 
 ::: {.notes}
 Several limitations could move our estimate in either direction.

@@ -66,3 +66,8 @@
 .reveal .marlins-chart figure,.reveal .marlins-chart p { margin:0; }
 .reveal .marlins-chart img { display:block; width:100%; height:auto; max-height:310px; object-fit:contain; }
 .reveal .marlins-chart figcaption { display:none; }
+
+.reveal .combined-splits-slide .photo-layout { grid-template-columns:minmax(0,2.25fr) minmax(0,1fr); gap:30px; }
+.reveal .combined-splits-slide .inline-splits-chart { width:100%; height:310px; max-height:310px; object-fit:contain; margin:15px 0 0; }
+.reveal .combined-splits-slide .photo-copy figure { margin:0; }
+.reveal .combined-splits-slide .photo-copy li { font-size:.93em; }
