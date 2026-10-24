@@ -51,13 +51,11 @@ This work was guided by Dr. Scott Nestler, Director of the UF Sports Analytics L
 - The Oakland A's tried this experiment in the late 60's and early 70's to limited success, but we are assuming better runners, a more optimized usage strategy, and average baserunning instincts
 
 ::: {.notes}
-Could a sprinter outperform the final position player on an MLB roster? MLB rosters have 26 players on the roster, split into 13 pitchers and 13 position players. Since pitchers have traditionally been rostered over hitters when the opportunity arrises, we examined removing the 13th position player (batter).
+Could a sprinter outperform the final position player on an MLB roster? MLB rosters have 26 players, split into 13 pitchers and 13 position players. Since pitchers have traditionally been rostered over hitters when the opportunity arrises, we examined removing the 13th position player (batter).
 
-The bench player provides hitting, fielding, and depth. The sprinter contributes only as a pinch runner, and using him removes the original player for the rest of the game. We assume that he cannot bat or field at all. We have to weigh stolen-base gains against those lost contributions.
+The bench player provides hitting, fielding, and depth. The sprinter contributes only as a pinch runner, and using him removes the original player for the rest of the game. We assume that he cannot bat or field at all.
 
-We compare these roster choices over a full season using 2021–2025 regular-season data. This includes the extra-inning automatic-runner rule but excludes 2020 and its seven-inning doubleheaders.
-
-The Oakland A's also gave this a try a while back, and their experiment of using designated runners wasn't as successful as it could've been. While their runners did lack fundamental baserunning instincts, they also did not select the fastest sprinters and did not use these players as optimally as they could have.
+The Oakland A's gave this a try in the 60's and 70's, and their experiment of using designated runners wasn't as successful as it could've been. While their runners did lack fundamental baserunning instincts, they also did not select the fastest sprinters and did not use these players as optimally as they could have.
 :::
 
 ## Selecting the 13th batter
@@ -69,15 +67,9 @@ The Oakland A's also gave this a try a while back, and their experiment of using
 - The 13th batter averaged -0.498 WAR per season
 
 ::: {.notes}
-We examined every six-game window, approximating a week while allowing the selected player to change during the season.
+To select the 13th batter, we examined every six-game window, approximating a week while allowing the selected player to change during the season. Due to the physical stress of playing the catcher position, teams are usually forced to roster two of them over the course of a season. We protected the two players with the most catching innings, then selected the least-used remaining position player as the “13th batter.”
 
-Due to the physical stress of playing the catcher position, teams are usually forced to roster two of them over the course of a season. We protected the two players with the most catching innings, then selected the least-used remaining position player as the “13th batter.”
-
-We reconstructed approximate Wins Above Replacement, or WAR, using batting, baserunning, fielding, positional adjustments, and other run-value components. Averaging across selected players estimates the roster spot’s value from actual usage, rather than assuming zero WAR.
-
-We also compared teams when they had 12 versus 13 position players. We found no statistically significant performance difference between those teams. That does not prove bench depth has no value, but it does mean that carrying the 13th batter might not be as significant as one might think.
-
-Over the course of a full season, the 13th batter averaged roughly a half win below replacement level.
+We also compared teams when they had 12 versus 13 position players. We found no statistically significant performance difference between those teams. That does not prove bench depth has no value, but it does mean that carrying the 13th batter might not be as significant as one might think. Over the course of a full season, the 13th batter averaged roughly a half win below replacement level.
 :::
 
 ## Estimating the sprinter’s stolen-base success rate (1/2) {.photo-slide .combined-splits-slide}
@@ -218,21 +210,21 @@ Something interesting to consider is that teams closer to .500 who experience mo
 
 ## Limitations and unmodeled effects
 
-- Readiness: Assume adequate baserunning skills and physical preparation
 - Scope: Model steals of second and third, not other advancement
+- Readiness: Assume adequate baserunning skills and physical preparation
 - Roster costs: Incompletely capture rest needs and bench flexibility
 - Defensive strategies: More pickoff attempts or the reintroduction of pitchouts
 
 ::: {.notes}
 Several limitations could move our estimate in either direction.
 
-We assume adequate baseball-specific skills and physical preparation before deployment. We did not model surface differences, including track versus infield dirt.
-
 We also count steals of second and third, but not other advancement, such as scoring from second on a single. Those omitted opportunities could add value to the sprinter.
 
 On the cost side, fewer position players could limit rest and affect fatigue, injuries, or performance; we lacked medical data to quantify these effects. Another bench player must also remain available to replace the sprinter. Our replacement-cost estimate does not fully capture that lost flexibility. MLB expands the rosters from 26 players to 28 players in September and October; these might ease these constraints, but the samples were too small for precise estimates.
 
-Finally, opponents could adjust through pickoffs, pitchouts, or other tactics, affecting success rates and creating defensive tradeoffs. We lack the available data those responses. For example, pitchouts have been mostly abandoned since the adoption of sabermetrics due to their perceived negative value. It would be an individual team decision as to whether to bring back pitchouts.
+We assume adequate baseball-specific skills and physical preparation, such as learning baserunning abilities at an MLB-average level.
+
+Finally, opponents could adjust through pickoffs, pitchouts, or other tactics, affecting success rates and creating defensive tradeoffs. We lack the available data to model those responses. For example, pitchouts have been mostly abandoned since the adoption of sabermetrics due to their perceived negative value. It would be an individual team decision as to whether to bring back pitchouts.
 :::
 
 ## An Olympic-caliber sprinter could justify a roster spot
